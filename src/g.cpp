@@ -137,6 +137,38 @@ optional<g1> g1::fromCompressedBytesBE(const span<const uint8_t, 48> in)
     return p;
 }
 
+optional<g1> g1::fromCompressedMCLBytesLE(const span<const uint8_t, 48> in)
+{
+    // reconstruct point from x coordinate
+    bool yIsOdd = (in[47] >> 7) == 1;
+    g1 p;
+    scalar::fromBytesLE(in, p.x.d);
+    // erase 3 msbs from given input and perform validity check
+    p.x.d[5] &= 0x1FFFFFFFFFFFFFFF;
+    p.x = p.x.toMont();
+    if(!p.x.isValid())
+    {
+        return {};
+    }
+    // BLS 12-381 curve equation:
+    //      y^2 = x^3 + B
+    //  =>  y   = +/- sqrt(x^3 + B)
+    fp b = fp::B;
+    _square(&p.y, &p.x);        // y = x^2
+    _multiply(&p.y, &p.y, &p.x);     // y = x^2 * x = x^3
+    _add(&p.y, &p.y, &b);       // y = x^3 + B
+    if(!p.y.sqrt(p.y))
+    {
+        return {};
+    }
+    if(((p.y.fromMont().d[0]&1) ^ yIsOdd))
+    {
+        _negate(&p.y, &p.y);
+    }
+    p.z = fp::one();
+    return p;
+}
+
 void g1::toJacobianBytesBE(const span<uint8_t, 144> out, const from_mont fm /* = from_mont::yes */) const
 {
     memcpy(&out[ 0], &x.toBytesBE(fm)[0], 48);
@@ -848,6 +880,44 @@ optional<g2> g2::fromCompressedBytesBE(const span<const uint8_t, 96> in)
         return {};
     }
     if(p.y.isLexicographicallyLargest() ^ ysign)
+    {
+        p.y = p.y.negate();
+    }
+    p.z = fp2::one();
+    return p;
+}
+
+optional<g2> g2::fromCompressedMCLBytesLE(const span<const uint8_t, 96> in)
+{
+    // reconstruct point from x coordinate
+    bool yIsOdd = (in[95] >> 7) == 1;
+    g2 p;
+
+    scalar::fromBytesLE(span<const uint8_t, 48>(&in[0], 48), p.x.c0.d);
+    scalar::fromBytesLE(span<const uint8_t, 48>(&in[48], 48), p.x.c1.d);
+    // erase 3 msbs from given input and perform validity check
+    // scalar::fromBytesLE(in, p.x.c0.d);
+    // scalar::fromBytesLE(in+48, p.x.c1.d);
+    // erase 3 msbs from given input and perform validity check
+    p.x.c0.d[5] &= 0x1FFFFFFFFFFFFFFF;
+    p.x.c0 = p.x.c0.toMont();
+    p.x.c1 = p.x.c1.toMont();
+    if(!p.x.c0.isValid() || !p.x.c1.isValid())
+    {
+        return {};
+    }
+    // BLS 12-381 curve equation:
+    //      y^2 = x^3 + B
+    //  =>  y   = +/- sqrt(x^3 + B)
+    fp2 b = fp2::B;
+    p.y = p.x.square();       // y = x^2
+    p.y.multiplyAssign(p.x);  // y = x^2 * x = x^3
+    p.y.addAssign(b);         // y = x^3 + B
+    if(!p.y.sqrt(p.y))
+    {
+        return {};
+    }
+    if(((p.y.c0.fromMont().d[0]&1) ^ yIsOdd))
     {
         p.y = p.y.negate();
     }
