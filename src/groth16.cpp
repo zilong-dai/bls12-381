@@ -328,8 +328,14 @@ namespace bls12_381_groth16
 
 
         //  sumKTimesPub += K₂ * publicInputs[1]
-        sumKTimesPub.addAssign(vk->k[2].scale(proof->public_input_0));
+        sumKTimesPub.addAssign(vk->k[2].scale(proof->public_input_1));
 
+
+        std::vector<std::tuple<g1, g2>> v;
+        pairing::add_pair(v, proof->pi_1, proof->pi_2);
+        pairing::add_pair(v, sumKTimesPub, precomputed->gammaNeg);
+        pairing::add_pair(v, proof->pi_3, precomputed->deltaNeg);
+/*
         // compute e([π₁]₁, [π₂]₂)
         fp12 ePi1Pi2 = computeMillerLoopSingle(proof->pi_1, proof->pi_2);
 
@@ -341,6 +347,9 @@ namespace bls12_381_groth16
 
         // compute z = e(α, β) * e( [Σᵥ (Kᵥ₊₁ * publicInputs[v])]₁, -[γ]₂ ) * e([π₃]1, -[δ]₂)
         fp12 z = ePi1Pi2.multiply(eSumKTimesPubGammaNeg).multiply(ePi3DeltaNeg);
+
+        */
+        fp12 z = pairing::miller_loop(v, std::function<void()>());
         pairing::final_exponentiation(z);
         if(z.equal(precomputed->eAlphaBeta)){
             return 1;
