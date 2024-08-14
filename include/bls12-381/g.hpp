@@ -2,8 +2,8 @@
 #include <cmath>
 #include <cstdint>
 #include <functional>
-#include <optional>
-#include <span>
+#include <polyfills/optional.hpp>
+#include <polyfills/span.hpp>
 #include <bls12-381/fp.hpp>
 
 namespace bls12_381
@@ -23,22 +23,22 @@ public:
     g1();
     explicit g1(const std::array<fp, 3>& e3);
     g1(const g1& e);
-    static std::optional<g1> fromJacobianBytesBE(const std::span<const uint8_t, 144> in,
+    static tl::optional<g1> fromJacobianBytesBE(const tcb::span<const uint8_t, 144> in,
                                                  conv_opt opt = { .check_valid = false, .to_mont = true });
-    static std::optional<g1> fromJacobianBytesLE(const std::span<const uint8_t, 144> in,
+    static tl::optional<g1> fromJacobianBytesLE(const tcb::span<const uint8_t, 144> in,
                                                  conv_opt opt = { .check_valid = false, .to_mont = true });
-    static std::optional<g1> fromAffineBytesBE(const std::span<const uint8_t, 96> in,
+    static tl::optional<g1> fromAffineBytesBE(const tcb::span<const uint8_t, 96> in,
                                                conv_opt opt = { .check_valid = false, .to_mont = true });
-    static std::optional<g1> fromAffineBytesLE(const std::span<const uint8_t, 96> in,
+    static tl::optional<g1> fromAffineBytesLE(const tcb::span<const uint8_t, 96> in,
                                                conv_opt opt = { .check_valid = false, .to_mont = true });
-    static std::optional<g1> fromCompressedBytesBE(const std::span<const uint8_t, 48> in);
-    static std::optional<g1> fromCompressedMCLBytesLE(const std::span<const uint8_t, 48> in);
-    void toJacobianBytesBE(const std::span<uint8_t, 144> out, const from_mont fm = from_mont::yes) const;
-    void toJacobianBytesLE(const std::span<uint8_t, 144> out, const from_mont fm = from_mont::yes) const;
-    void toAffineBytesBE(const std::span<uint8_t, 96> out, const from_mont fm = from_mont::yes) const;
-    void toAffineBytesLE(const std::span<uint8_t, 96> out, const from_mont fm = from_mont::yes) const;
-    void toCompressedBytesBE(const std::span<uint8_t, 48> out) const;
-    void toCompressedMCLBytesLE(const std::span<uint8_t, 48> out) const;
+    static tl::optional<g1> fromCompressedBytesBE(const tcb::span<const uint8_t, 48> in);
+    static tl::optional<g1> fromCompressedMCLBytesLE(const tcb::span<const uint8_t, 48> in);
+    void toJacobianBytesBE(const tcb::span<uint8_t, 144> out, const from_mont fm = from_mont::yes) const;
+    void toJacobianBytesLE(const tcb::span<uint8_t, 144> out, const from_mont fm = from_mont::yes) const;
+    void toAffineBytesBE(const tcb::span<uint8_t, 96> out, const from_mont fm = from_mont::yes) const;
+    void toAffineBytesLE(const tcb::span<uint8_t, 96> out, const from_mont fm = from_mont::yes) const;
+    void toCompressedBytesBE(const tcb::span<uint8_t, 48> out) const;
+    void toCompressedMCLBytesLE(const tcb::span<uint8_t, 48> out) const;
     std::array<uint8_t, 144> toJacobianBytesBE(const from_mont fm = from_mont::yes) const;
     std::array<uint8_t, 144> toJacobianBytesLE(const from_mont fm = from_mont::yes) const;
     std::array<uint8_t, 96> toAffineBytesBE(const from_mont fm = from_mont::yes) const;
@@ -69,7 +69,7 @@ public:
     // DO NOT use them to compare g1.
     auto operator<=>(const g1&) const = default;
    
-    static g1 weightedSum(std::span<const g1> points, std::span<const std::array<uint64_t, 4>> scalars, const std::function<void()>& yield = std::function<void()>());
+    static g1 weightedSum(tcb::span<const g1> points, tcb::span<const std::array<uint64_t, 4>> scalars, const std::function<void()>& yield = std::function<void()>());
     static g1 mapToCurve(const fp& e);
     static std::tuple<fp, fp> swuMapG1(const fp& e);
     static void isogenyMapG1(fp& x, fp& y);
@@ -92,22 +92,22 @@ public:
     g2();
     explicit g2(const std::array<fp2, 3>& e3);
     g2(const g2& e);
-    static std::optional<g2> fromJacobianBytesBE(const std::span<const uint8_t, 288> in,
+    static tl::optional<g2> fromJacobianBytesBE(const tcb::span<const uint8_t, 288> in,
                                                  conv_opt opt = { .check_valid = false, .to_mont = true });
-    static std::optional<g2> fromJacobianBytesLE(const std::span<const uint8_t, 288> in,
+    static tl::optional<g2> fromJacobianBytesLE(const tcb::span<const uint8_t, 288> in,
                                                  conv_opt opt = { .check_valid = false, .to_mont = true });
-    static std::optional<g2> fromAffineBytesBE(const std::span<const uint8_t, 192> in,
+    static tl::optional<g2> fromAffineBytesBE(const tcb::span<const uint8_t, 192> in,
                                                conv_opt opt = { .check_valid = false, .to_mont = true });
-    static std::optional<g2> fromAffineBytesLE(const std::span<const uint8_t, 192> in,
+    static tl::optional<g2> fromAffineBytesLE(const tcb::span<const uint8_t, 192> in,
                                                conv_opt opt = { .check_valid = false, .to_mont = true });
-    static std::optional<g2> fromCompressedBytesBE(const std::span<const uint8_t, 96> in);
-    static std::optional<g2> fromCompressedMCLBytesLE(const std::span<const uint8_t, 96> in);
-    void toJacobianBytesBE(const std::span<uint8_t, 288> out, const from_mont fm = from_mont::yes) const;
-    void toJacobianBytesLE(const std::span<uint8_t, 288> out, const from_mont fm = from_mont::yes) const;
-    void toAffineBytesBE(const std::span<uint8_t, 192> out, const from_mont fm = from_mont::yes) const;
-    void toAffineBytesLE(const std::span<uint8_t, 192> out, const from_mont fm = from_mont::yes) const;
-    void toCompressedBytesBE(const std::span<uint8_t, 96> out) const;
-    void toCompressedMCLBytesLE(const std::span<uint8_t, 96> out) const;
+    static tl::optional<g2> fromCompressedBytesBE(const tcb::span<const uint8_t, 96> in);
+    static tl::optional<g2> fromCompressedMCLBytesLE(const tcb::span<const uint8_t, 96> in);
+    void toJacobianBytesBE(const tcb::span<uint8_t, 288> out, const from_mont fm = from_mont::yes) const;
+    void toJacobianBytesLE(const tcb::span<uint8_t, 288> out, const from_mont fm = from_mont::yes) const;
+    void toAffineBytesBE(const tcb::span<uint8_t, 192> out, const from_mont fm = from_mont::yes) const;
+    void toAffineBytesLE(const tcb::span<uint8_t, 192> out, const from_mont fm = from_mont::yes) const;
+    void toCompressedBytesBE(const tcb::span<uint8_t, 96> out) const;
+    void toCompressedMCLBytesLE(const tcb::span<uint8_t, 96> out) const;
     std::array<uint8_t, 288> toJacobianBytesBE(const from_mont fm = from_mont::yes) const;
     std::array<uint8_t, 288> toJacobianBytesLE(const from_mont fm = from_mont::yes) const;
     std::array<uint8_t, 192> toAffineBytesBE(const from_mont fm = from_mont::yes) const;
@@ -139,7 +139,7 @@ public:
     // DO NOT use them to compare g2.
     auto operator<=>(const g2&) const = default;
 
-    static g2 weightedSum(std::span<const g2> points, std::span<const std::array<uint64_t, 4>> scalars, const std::function<void()>& yield = std::function<void()>());
+    static g2 weightedSum(tcb::span<const g2> points, tcb::span<const std::array<uint64_t, 4>> scalars, const std::function<void()>& yield = std::function<void()>());
     static g2 mapToCurve(const fp2& e);
     static std::tuple<fp2, fp2> swuMapG2(const fp2& e);
     //static void isogenyMapG2(fp2& x, fp2& y);

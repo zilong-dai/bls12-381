@@ -93,7 +93,7 @@ void pre_compute(array<array<fp2, 3>, 68>& ellCoeffs, const g2& twistPoint)
     }
 }
 
-fp12 miller_loop(std::span<const std::tuple<g1, g2>> pairs, std::function<void()> yield)
+fp12 miller_loop(tcb::span<const std::tuple<g1, g2>> pairs, std::function<void()> yield)
 {
     vector<array<array<fp2, 3>, 68>> ellCoeffs;
     ellCoeffs.resize(pairs.size());
@@ -177,7 +177,7 @@ void final_exponentiation(fp12& f)
     f = t[3].multiply(t[4]);
 }
 
-fp12 calculate(std::span<const std::tuple<g1, g2>> pairs, std::function<void()> yield)
+fp12 calculate(tcb::span<const std::tuple<g1, g2>> pairs, std::function<void()> yield)
 {
     fp12 f = fp12::one();
     if(pairs.empty())

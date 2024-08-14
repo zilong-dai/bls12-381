@@ -30,7 +30,7 @@ vector<uint8_t> hexToBytes(std::string_view s)
     return bytes;
 }
 
-string bytesToHex(std::span<const uint8_t> in)
+string bytesToHex(tcb::span<const uint8_t> in)
 {
     constexpr char hexmap[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
     string s(2 + in.size() * 2, ' ');

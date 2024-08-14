@@ -17,14 +17,14 @@ g1::g1(const g1& e) : x(e.x), y(e.y), z(e.z)
 {
 }
 
-optional<g1> g1::fromJacobianBytesBE(const span<const uint8_t, 144> in, conv_opt opt)
+tl::optional<g1> g1::fromJacobianBytesBE(const tcb::span<const uint8_t, 144> in, conv_opt opt)
 {
     // We decided to always validate the input here. Check flag will only affect on-curve checks.
     bool curve_check = opt.check_valid;
     opt.check_valid = true;
-    optional<fp> x = fp::fromBytesBE(span<const uint8_t, 48>(&in[ 0], 48), opt);
-    optional<fp> y = fp::fromBytesBE(span<const uint8_t, 48>(&in[48], 48), opt);
-    optional<fp> z = fp::fromBytesBE(span<const uint8_t, 48>(&in[96], 48), opt);
+    tl::optional<fp> x = fp::fromBytesBE(tcb::span<const uint8_t, 48>(&in[ 0], 48), opt);
+    tl::optional<fp> y = fp::fromBytesBE(tcb::span<const uint8_t, 48>(&in[48], 48), opt);
+    tl::optional<fp> z = fp::fromBytesBE(tcb::span<const uint8_t, 48>(&in[96], 48), opt);
     if(!x || !y || !z) return {};
     g1 p = g1({*x, *y, *z});
     if(curve_check && !p.isOnCurve())
@@ -34,14 +34,14 @@ optional<g1> g1::fromJacobianBytesBE(const span<const uint8_t, 144> in, conv_opt
     return p;
 }
 
-optional<g1> g1::fromJacobianBytesLE(const span<const uint8_t, 144> in, conv_opt opt)
+tl::optional<g1> g1::fromJacobianBytesLE(const tcb::span<const uint8_t, 144> in, conv_opt opt)
 {
     // We decided to always validate the input here. Check flag will only affect on-curve checks.
     bool curve_check = opt.check_valid;
     opt.check_valid = true;
-    optional<fp> x = fp::fromBytesLE(span<const uint8_t, 48>(&in[ 0], 48), opt);
-    optional<fp> y = fp::fromBytesLE(span<const uint8_t, 48>(&in[48], 48), opt);
-    optional<fp> z = fp::fromBytesLE(span<const uint8_t, 48>(&in[96], 48), opt);
+    tl::optional<fp> x = fp::fromBytesLE(tcb::span<const uint8_t, 48>(&in[ 0], 48), opt);
+    tl::optional<fp> y = fp::fromBytesLE(tcb::span<const uint8_t, 48>(&in[48], 48), opt);
+    tl::optional<fp> z = fp::fromBytesLE(tcb::span<const uint8_t, 48>(&in[96], 48), opt);
     if(!x || !y || !z) return {};
     g1 p = g1({*x, *y, *z});
     if(curve_check && !p.isOnCurve())
@@ -51,13 +51,13 @@ optional<g1> g1::fromJacobianBytesLE(const span<const uint8_t, 144> in, conv_opt
     return p;
 }
 
-optional<g1> g1::fromAffineBytesBE(const span<const uint8_t, 96> in, conv_opt opt)
+tl::optional<g1> g1::fromAffineBytesBE(const tcb::span<const uint8_t, 96> in, conv_opt opt)
 {
     // We decided to always validate the input here. Check flag will only affect on-curve checks.
     bool curve_check = opt.check_valid;
     opt.check_valid = true;
-    optional<fp> x = fp::fromBytesBE(span<const uint8_t, 48>(&in[ 0], 48), opt);
-    optional<fp> y = fp::fromBytesBE(span<const uint8_t, 48>(&in[48], 48), opt);
+    tl::optional<fp> x = fp::fromBytesBE(tcb::span<const uint8_t, 48>(&in[ 0], 48), opt);
+    tl::optional<fp> y = fp::fromBytesBE(tcb::span<const uint8_t, 48>(&in[48], 48), opt);
     if(!x || !y) return {};
     // check if given input points to infinity
     if(x->isZero() && y->isZero())
@@ -73,13 +73,13 @@ optional<g1> g1::fromAffineBytesBE(const span<const uint8_t, 96> in, conv_opt op
     return p;
 }
 
-optional<g1> g1::fromAffineBytesLE(const span<const uint8_t, 96> in, conv_opt opt)
+tl::optional<g1> g1::fromAffineBytesLE(const tcb::span<const uint8_t, 96> in, conv_opt opt)
 {
     // We decided to always validate the input here. Check flag will only affect on-curve checks.
     bool curve_check = opt.check_valid;
     opt.check_valid = true;
-    optional<fp> x = fp::fromBytesLE(span<const uint8_t, 48>(&in[ 0], 48), opt);
-    optional<fp> y = fp::fromBytesLE(span<const uint8_t, 48>(&in[48], 48), opt);
+    tl::optional<fp> x = fp::fromBytesLE(tcb::span<const uint8_t, 48>(&in[ 0], 48), opt);
+    tl::optional<fp> y = fp::fromBytesLE(tcb::span<const uint8_t, 48>(&in[48], 48), opt);
     if(!x || !y) return {};
     // check if given input points to infinity
     if(x->isZero() && y->isZero())
@@ -95,7 +95,7 @@ optional<g1> g1::fromAffineBytesLE(const span<const uint8_t, 96> in, conv_opt op
     return p;
 }
 
-optional<g1> g1::fromCompressedMCLBytesLE(const span<const uint8_t, 48> in)
+tl::optional<g1> g1::fromCompressedMCLBytesLE(const tcb::span<const uint8_t, 48> in)
 {
     // reconstruct point from x coordinate
     bool yIsOdd = (in[47] >> 7) == 1;
@@ -126,7 +126,7 @@ optional<g1> g1::fromCompressedMCLBytesLE(const span<const uint8_t, 48> in)
     p.z = fp::one();
     return p;
 }
-optional<g1> g1::fromCompressedBytesBE(const span<const uint8_t, 48> in)
+tl::optional<g1> g1::fromCompressedBytesBE(const tcb::span<const uint8_t, 48> in)
 {
     // check compression bit
     if(((in[0] >> 7) & 1) != 1)
@@ -168,21 +168,21 @@ optional<g1> g1::fromCompressedBytesBE(const span<const uint8_t, 48> in)
     return p;
 }
 
-void g1::toJacobianBytesBE(const span<uint8_t, 144> out, const from_mont fm /* = from_mont::yes */) const
+void g1::toJacobianBytesBE(const tcb::span<uint8_t, 144> out, const from_mont fm /* = from_mont::yes */) const
 {
     memcpy(&out[ 0], &x.toBytesBE(fm)[0], 48);
     memcpy(&out[48], &y.toBytesBE(fm)[0], 48);
     memcpy(&out[96], &z.toBytesBE(fm)[0], 48);
 }
 
-void g1::toJacobianBytesLE(const span<uint8_t, 144> out, const from_mont fm /* = from_mont::yes */) const
+void g1::toJacobianBytesLE(const tcb::span<uint8_t, 144> out, const from_mont fm /* = from_mont::yes */) const
 {
     memcpy(&out[ 0], &x.toBytesLE(fm)[0], 48);
     memcpy(&out[48], &y.toBytesLE(fm)[0], 48);
     memcpy(&out[96], &z.toBytesLE(fm)[0], 48);
 }
 
-void g1::toAffineBytesBE(const span<uint8_t, 96> out, const from_mont fm /* = from_mont::yes */) const
+void g1::toAffineBytesBE(const tcb::span<uint8_t, 96> out, const from_mont fm /* = from_mont::yes */) const
 {
     if(isZero())
     {
@@ -194,7 +194,7 @@ void g1::toAffineBytesBE(const span<uint8_t, 96> out, const from_mont fm /* = fr
     memcpy(&out[48], &r.y.toBytesBE(fm)[0], 48);
 }
 
-void g1::toAffineBytesLE(const span<uint8_t, 96> out, const from_mont fm /* = from_mont::yes */) const
+void g1::toAffineBytesLE(const tcb::span<uint8_t, 96> out, const from_mont fm /* = from_mont::yes */) const
 {
     if(isZero())
     {
@@ -206,7 +206,7 @@ void g1::toAffineBytesLE(const span<uint8_t, 96> out, const from_mont fm /* = fr
     memcpy(&out[48], &r.y.toBytesLE(fm)[0], 48);
 }
 
-void g1::toCompressedBytesBE(const span<uint8_t, 48> out) const
+void g1::toCompressedBytesBE(const tcb::span<uint8_t, 48> out) const
 {
     // check: https://github.com/zcash/librustzcash/blob/6e0364cd42a2b3d2b958a54771ef51a8db79dd29/pairing/src/bls12_381/README.md#serialization
     g1 p = affine();
@@ -227,7 +227,7 @@ void g1::toCompressedBytesBE(const span<uint8_t, 48> out) const
     out[0] |= 0x80;
 }
 
-void g1::toCompressedMCLBytesLE(const span<uint8_t, 48> out) const
+void g1::toCompressedMCLBytesLE(const tcb::span<uint8_t, 48> out) const
 {
     // check: https://github.com/zcash/librustzcash/blob/6e0364cd42a2b3d2b958a54771ef51a8db79dd29/pairing/src/bls12_381/README.md#serialization
     g1 p = affine();
@@ -520,7 +520,7 @@ g1 g1::glvEndomorphism() const
 // (P_0, e_0), (P_1, e_1), ... (P_n, e_n) calculates r = e_0 * P_0 + e_1 * P_1 + ... + e_n * P_n
 // If length of points and scalars are not the same, then missing points will be treated as the zero point 
 // and missing scalars will be treated as the zero scalar.
-g1 g1::weightedSum(std::span<const g1> points, std::span<const std::array<uint64_t, 4>> scalars, const std::function<void()>& yield)
+g1 g1::weightedSum(tcb::span<const g1> points, tcb::span<const std::array<uint64_t, 4>> scalars, const std::function<void()>& yield)
 {
     const size_t effective_size = min(scalars.size(), points.size());
     uint64_t c = 3;
@@ -781,14 +781,14 @@ g2::g2(const g2& e) : x(e.x), y(e.y), z(e.z)
 {
 }
 
-optional<g2> g2::fromJacobianBytesBE(const span<const uint8_t, 288> in, conv_opt opt)
+tl::optional<g2> g2::fromJacobianBytesBE(const tcb::span<const uint8_t, 288> in, conv_opt opt)
 {
     // We decided to always validate the input here. Check flag will only affect on-curve checks.
     bool curve_check = opt.check_valid;
     opt.check_valid = true;
-    optional<fp2> x = fp2::fromBytesBE(span<const uint8_t, 96>(&in[  0], 96), opt);
-    optional<fp2> y = fp2::fromBytesBE(span<const uint8_t, 96>(&in[ 96], 96), opt);
-    optional<fp2> z = fp2::fromBytesBE(span<const uint8_t, 96>(&in[192], 96), opt);
+    tl::optional<fp2> x = fp2::fromBytesBE(tcb::span<const uint8_t, 96>(&in[  0], 96), opt);
+    tl::optional<fp2> y = fp2::fromBytesBE(tcb::span<const uint8_t, 96>(&in[ 96], 96), opt);
+    tl::optional<fp2> z = fp2::fromBytesBE(tcb::span<const uint8_t, 96>(&in[192], 96), opt);
     if(!x || !y || !z) return {};
     g2 p = g2({*x, *y, *z});
     if(curve_check && !p.isOnCurve())
@@ -798,14 +798,14 @@ optional<g2> g2::fromJacobianBytesBE(const span<const uint8_t, 288> in, conv_opt
     return p;
 }
 
-optional<g2> g2::fromJacobianBytesLE(const span<const uint8_t, 288> in, conv_opt opt)
+tl::optional<g2> g2::fromJacobianBytesLE(const tcb::span<const uint8_t, 288> in, conv_opt opt)
 {
     // We decided to always validate the input here. Check flag will only affect on-curve checks.
     bool curve_check = opt.check_valid;
     opt.check_valid = true;
-    optional<fp2> x = fp2::fromBytesLE(span<const uint8_t, 96>(&in[  0], 96), opt);
-    optional<fp2> y = fp2::fromBytesLE(span<const uint8_t, 96>(&in[ 96], 96), opt);
-    optional<fp2> z = fp2::fromBytesLE(span<const uint8_t, 96>(&in[192], 96), opt);
+    tl::optional<fp2> x = fp2::fromBytesLE(tcb::span<const uint8_t, 96>(&in[  0], 96), opt);
+    tl::optional<fp2> y = fp2::fromBytesLE(tcb::span<const uint8_t, 96>(&in[ 96], 96), opt);
+    tl::optional<fp2> z = fp2::fromBytesLE(tcb::span<const uint8_t, 96>(&in[192], 96), opt);
     if(!x || !y || !z) return {};
     g2 p = g2({*x, *y, *z});
     if(curve_check && !p.isOnCurve())
@@ -815,13 +815,13 @@ optional<g2> g2::fromJacobianBytesLE(const span<const uint8_t, 288> in, conv_opt
     return p;
 }
 
-optional<g2> g2::fromAffineBytesBE(const span<const uint8_t, 192> in, conv_opt opt)
+tl::optional<g2> g2::fromAffineBytesBE(const tcb::span<const uint8_t, 192> in, conv_opt opt)
 {
     // We decided to always validate the input here. Check flag will only affect on-curve checks.
     bool curve_check = opt.check_valid;
     opt.check_valid = true;
-    optional<fp2> x = fp2::fromBytesBE(span<const uint8_t, 96>(&in[  0], 96), opt);
-    optional<fp2> y = fp2::fromBytesBE(span<const uint8_t, 96>(&in[ 96], 96), opt);
+    tl::optional<fp2> x = fp2::fromBytesBE(tcb::span<const uint8_t, 96>(&in[  0], 96), opt);
+    tl::optional<fp2> y = fp2::fromBytesBE(tcb::span<const uint8_t, 96>(&in[ 96], 96), opt);
     if(!x || !y) return {};
     // check if given input points to infinity
     if(x->isZero() && y->isZero())
@@ -837,13 +837,13 @@ optional<g2> g2::fromAffineBytesBE(const span<const uint8_t, 192> in, conv_opt o
     return p;
 }
 
-optional<g2> g2::fromAffineBytesLE(const span<const uint8_t, 192> in, conv_opt opt)
+tl::optional<g2> g2::fromAffineBytesLE(const tcb::span<const uint8_t, 192> in, conv_opt opt)
 {
     // We decided to always validate the input here. Check flag will only affect on-curve checks.
     bool curve_check = opt.check_valid;
     opt.check_valid = true;
-    optional<fp2> x = fp2::fromBytesLE(span<const uint8_t, 96>(&in[  0], 96), opt);
-    optional<fp2> y = fp2::fromBytesLE(span<const uint8_t, 96>(&in[ 96], 96), opt);
+    tl::optional<fp2> x = fp2::fromBytesLE(tcb::span<const uint8_t, 96>(&in[  0], 96), opt);
+    tl::optional<fp2> y = fp2::fromBytesLE(tcb::span<const uint8_t, 96>(&in[ 96], 96), opt);
     if(!x || !y) return {};
     // check if given input points to infinity
     if(x->isZero() && y->isZero())
@@ -859,7 +859,7 @@ optional<g2> g2::fromAffineBytesLE(const span<const uint8_t, 192> in, conv_opt o
     return p;
 }
 
-optional<g2> g2::fromCompressedBytesBE(const span<const uint8_t, 96> in)
+tl::optional<g2> g2::fromCompressedBytesBE(const tcb::span<const uint8_t, 96> in)
 {
     // check compression bit
     if(((in[0] >> 7) & 1) != 1)
@@ -874,8 +874,8 @@ optional<g2> g2::fromCompressedBytesBE(const span<const uint8_t, 96> in)
     // reconstruct point from x coordinate
     bool ysign = ((in[0] >> 5) & 1) == 1;
     g2 p;
-    scalar::fromBytesBE(span<const uint8_t, 48>(&in[0], 48), p.x.c1.d);
-    auto c0 = fp::fromBytesBE(span<const uint8_t, 48>(&in[48], 48));
+    scalar::fromBytesBE(tcb::span<const uint8_t, 48>(&in[0], 48), p.x.c1.d);
+    auto c0 = fp::fromBytesBE(tcb::span<const uint8_t, 48>(&in[48], 48));
     if (!c0) {
         return {};
     }
@@ -905,12 +905,12 @@ optional<g2> g2::fromCompressedBytesBE(const span<const uint8_t, 96> in)
     p.z = fp2::one();
     return p;
 }
-optional<g2> g2::fromCompressedMCLBytesLE(const span<const uint8_t, 96> in)
+tl::optional<g2> g2::fromCompressedMCLBytesLE(const tcb::span<const uint8_t, 96> in)
 {
     bool yIsOdd = (in[95] >> 7) == 1;
     g2 p;
-    auto c0 = fp::fromBytesLE(span<const uint8_t, 48>(&in[0], 48));
-    scalar::fromBytesLE<6>(span<const uint8_t, 48>(&in[48], 48), p.x.c1.d);
+    auto c0 = fp::fromBytesLE(tcb::span<const uint8_t, 48>(&in[0], 48));
+    scalar::fromBytesLE<6>(tcb::span<const uint8_t, 48>(&in[48], 48), p.x.c1.d);
     if (!c0) {
         return {};
     }
@@ -943,21 +943,21 @@ optional<g2> g2::fromCompressedMCLBytesLE(const span<const uint8_t, 96> in)
     return p;
 }
 
-void g2::toJacobianBytesBE(const span<uint8_t, 288> out, const from_mont fm /* = from_mont::yes */) const
+void g2::toJacobianBytesBE(const tcb::span<uint8_t, 288> out, const from_mont fm /* = from_mont::yes */) const
 {
     memcpy(&out[  0], &x.toBytesBE(fm)[0], 96);
     memcpy(&out[ 96], &y.toBytesBE(fm)[0], 96);
     memcpy(&out[192], &z.toBytesBE(fm)[0], 96);
 }
 
-void g2::toJacobianBytesLE(const span<uint8_t, 288> out, const from_mont fm /* = from_mont::yes */) const
+void g2::toJacobianBytesLE(const tcb::span<uint8_t, 288> out, const from_mont fm /* = from_mont::yes */) const
 {
     memcpy(&out[  0], &x.toBytesLE(fm)[0], 96);
     memcpy(&out[ 96], &y.toBytesLE(fm)[0], 96);
     memcpy(&out[192], &z.toBytesLE(fm)[0], 96);
 }
 
-void g2::toAffineBytesBE(const span<uint8_t, 192> out, const from_mont fm /* = from_mont::yes */) const
+void g2::toAffineBytesBE(const tcb::span<uint8_t, 192> out, const from_mont fm /* = from_mont::yes */) const
 {
     if(isZero())
     {
@@ -969,7 +969,7 @@ void g2::toAffineBytesBE(const span<uint8_t, 192> out, const from_mont fm /* = f
     memcpy(&out[96], &r.y.toBytesBE(fm)[0], 96);
 }
 
-void g2::toAffineBytesLE(const span<uint8_t, 192> out, const from_mont fm /* = from_mont::yes */) const
+void g2::toAffineBytesLE(const tcb::span<uint8_t, 192> out, const from_mont fm /* = from_mont::yes */) const
 {
     if(isZero())
     {
@@ -981,7 +981,7 @@ void g2::toAffineBytesLE(const span<uint8_t, 192> out, const from_mont fm /* = f
     memcpy(&out[96], &r.y.toBytesLE(fm)[0], 96);
 }
 
-void g2::toCompressedBytesBE(const span<uint8_t, 96> out) const
+void g2::toCompressedBytesBE(const tcb::span<uint8_t, 96> out) const
 {
     // check: https://github.com/zcash/librustzcash/blob/6e0364cd42a2b3d2b958a54771ef51a8db79dd29/pairing/src/bls12_381/README.md#serialization
     g2 p = affine();
@@ -1003,7 +1003,7 @@ void g2::toCompressedBytesBE(const span<uint8_t, 96> out) const
     out[0] |= 0x80;
 }
 
-void g2::toCompressedMCLBytesLE(const span<uint8_t, 96> out) const
+void g2::toCompressedMCLBytesLE(const tcb::span<uint8_t, 96> out) const
 {
     // check: https://github.com/zcash/librustzcash/blob/6e0364cd42a2b3d2b958a54771ef51a8db79dd29/pairing/src/bls12_381/README.md#serialization
     g2 p = affine();
@@ -1343,7 +1343,7 @@ g2 g2::frobeniusMap(int64_t power) const
 // (P_0, e_0), (P_1, e_1), ... (P_n, e_n) calculates r = e_0 * P_0 + e_1 * P_1 + ... + e_n * P_n
 // If length of points and scalars are not the same, then missing points will be treated as the zero point 
 // and missing scalars will be treated as the zero scalar.
-g2 g2::weightedSum(std::span<const g2> points, std::span<const std::array<uint64_t, 4>> scalars, const std::function<void()>& yield)
+g2 g2::weightedSum(tcb::span<const g2> points, tcb::span<const std::array<uint64_t, 4>> scalars, const std::function<void()>& yield)
 {
     const size_t effective_size = min(scalars.size(), points.size());
     uint64_t c = 3;

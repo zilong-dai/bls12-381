@@ -122,7 +122,7 @@ namespace bls12_381_groth16
         {
             return false;
         }
-        std::span<const unsigned char, 48> s(v->data() + startIndex, 48);
+        tcb::span<const unsigned char, 48> s(v->data() + startIndex, 48);
         auto fpOption = fp::fromBytesLE(s);
         if (!fpOption.has_value())
         {
@@ -141,7 +141,7 @@ namespace bls12_381_groth16
             return false;
         }
         auto x = (v->data() + startIndex);
-        const std::span<const unsigned char, 32> s(x, 32);
+        const tcb::span<const unsigned char, 32> s(x, 32);
         auto k = scalar::fromBytesLE<4>(s);
         out[0] = k[0];
         out[1] = k[1];

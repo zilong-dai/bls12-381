@@ -1053,12 +1053,12 @@ void TestG1SerializationGarbage()
 
     for (int i = 0; i < 4; ++i)
     {
-        auto a = g1::fromAffineBytesBE(std::span<const uint8_t, 96>{buf.begin(), 96}, {.check_valid = i < 2, .to_mont = !(i % 2)});
+        auto a = g1::fromAffineBytesBE(tcb::span<const uint8_t, 96>{buf.begin(), 96}, {.check_valid = i < 2, .to_mont = !(i % 2)});
         if (a)
         {
             throw invalid_argument("g1, affineBE: serialization not catching invalid input");
         }
-        auto b = g1::fromAffineBytesLE(std::span<const uint8_t, 96>{buf.begin(), 96}, {.check_valid = i < 2, .to_mont = !(i % 2)});
+        auto b = g1::fromAffineBytesLE(tcb::span<const uint8_t, 96>{buf.begin(), 96}, {.check_valid = i < 2, .to_mont = !(i % 2)});
         if (b)
         {
             throw invalid_argument("g1, affineLE: serialization not catching invalid input");
@@ -1435,12 +1435,12 @@ void TestG2SerializationGarbage()
     }
     for (int i = 0; i < 4; ++i)
     {
-        auto a = g2::fromAffineBytesBE(std::span<const uint8_t, 192>{buf.begin(), 192}, {.check_valid = i < 2, .to_mont = !(i % 2)});
+        auto a = g2::fromAffineBytesBE(tcb::span<const uint8_t, 192>{buf.begin(), 192}, {.check_valid = i < 2, .to_mont = !(i % 2)});
         if (a)
         {
             throw invalid_argument("g2, affineBE: serialization not catching invalid input");
         }
-        auto b = g2::fromAffineBytesLE(std::span<const uint8_t, 192>{buf.begin(), 192}, {.check_valid = i < 2, .to_mont = !(i % 2)});
+        auto b = g2::fromAffineBytesLE(tcb::span<const uint8_t, 192>{buf.begin(), 192}, {.check_valid = i < 2, .to_mont = !(i % 2)});
         if (b)
         {
             throw invalid_argument("g2, affineLE: serialization not catching invalid input");
