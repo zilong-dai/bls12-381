@@ -86,8 +86,6 @@ namespace bls12_381_groth16
         }
         std::array<unsigned char, 48> s1;
         std::copy(v->begin() + startIndex, v->begin() + startIndex + 48, s1.begin());
-        printf("testaa\n");
-        printf("hexbytes: %s\n", bytesToHex(s1).c_str());
         auto g1Option = g1::fromCompressedMCLBytesLE(s1);
         if (!g1Option.has_value())
         {
@@ -95,7 +93,6 @@ namespace bls12_381_groth16
         }
         else
         {
-            printf("x\n");
             *out = g1Option.value();
             return true;
         }
@@ -169,7 +166,6 @@ namespace bls12_381_groth16
         {
             return 0;
         }
-        printf("deproof 1\n");
 
         std::array<unsigned char, 96> pi_2_data;
         std::copy(pi_2_0->begin(), pi_2_0->end(), pi_2_data.begin());
@@ -180,13 +176,10 @@ namespace bls12_381_groth16
             return 0;
         }
         proof->pi_2 = pi_2_v.value();
-        printf("deproof 2\n");
         if (!deserializeG1FromVector(&proof->pi_3, (const std::vector<const unsigned char> *)pi_3, 0))
         {
             return 0;
         }
-
-        printf("deproof 3\n");
         if (!deserializeScalarFromVector(proof->public_input_0, (const std::vector<const unsigned char> *)public_input_0, 0))
         {
             return 0;
@@ -207,12 +200,10 @@ namespace bls12_381_groth16
         const std::vector<unsigned char> *e,
         const std::vector<unsigned char> *f)
     {
-        printf("test111\n");
         if (a->size() != 80 || b->size() != 80 || c->size() != 80 || d->size() != 80 || e->size() != 80 || f->size() != 80)
         {
             return 0;
         }
-        printf("dekey 1\n");
         std::array<unsigned char, 480> vkey_tmp_data;
         std::copy(a->begin(), a->end(), vkey_tmp_data.begin());
         std::copy(b->begin(), b->end(), vkey_tmp_data.begin() + 80);
@@ -220,12 +211,10 @@ namespace bls12_381_groth16
         std::copy(d->begin(), d->end(), vkey_tmp_data.begin() + 240);
         std::copy(e->begin(), e->end(), vkey_tmp_data.begin() + 320);
         std::copy(f->begin(), f->end(), vkey_tmp_data.begin() + 400);
-        printf("idata1\n");
 
         std::array<unsigned char, 48> g1_data;
         size_t ptr = 0;
         std::copy(vkey_tmp_data.begin(), vkey_tmp_data.begin() + 48, g1_data.begin());
-        printf("idata2\n");
         auto g1_option = g1::fromCompressedMCLBytesLE(g1_data);
         if (!g1_option.has_value())
         {
@@ -233,7 +222,6 @@ namespace bls12_381_groth16
         }
         vk->alpha = g1_option.value();
         ptr += 48;
-        printf("idata3\n");
 
         std::copy(vkey_tmp_data.begin() + ptr, vkey_tmp_data.begin() + ptr + 48, g1_data.begin());
         g1_option = g1::fromCompressedMCLBytesLE(g1_data);
@@ -243,7 +231,6 @@ namespace bls12_381_groth16
         }
         vk->k[0] = g1_option.value();
         ptr += 48;
-        printf("idata4\n");
 
         std::copy(vkey_tmp_data.begin() + ptr, vkey_tmp_data.begin() + ptr + 48, g1_data.begin());
         g1_option = g1::fromCompressedMCLBytesLE(g1_data);
@@ -253,7 +240,6 @@ namespace bls12_381_groth16
         }
         vk->k[1] = g1_option.value();
         ptr += 48;
-        printf("idata5\n");
 
         std::copy(vkey_tmp_data.begin() + ptr, vkey_tmp_data.begin() + ptr + 48, g1_data.begin());
         g1_option = g1::fromCompressedMCLBytesLE(g1_data);
@@ -263,8 +249,6 @@ namespace bls12_381_groth16
         }
         vk->k[2] = g1_option.value();
         ptr += 48;
-        printf("idata6\n");
-
 
         std::array<unsigned char, 96> g2_data;
         std::copy(vkey_tmp_data.begin() + ptr, vkey_tmp_data.begin() + ptr + 96, g2_data.begin());
@@ -275,7 +259,6 @@ namespace bls12_381_groth16
         }
         vk->beta = g2_option.value();
         ptr += 96;
-        printf("idata7\n");
 
         std::copy(vkey_tmp_data.begin() + ptr, vkey_tmp_data.begin() + ptr + 96, g2_data.begin());
         g2_option = g2::fromCompressedMCLBytesLE(g2_data);
@@ -285,7 +268,6 @@ namespace bls12_381_groth16
         }
         vk->delta = g2_option.value();
         ptr += 96;
-        printf("idata8\n");
 
 
         std::copy(vkey_tmp_data.begin() + ptr, vkey_tmp_data.begin() + ptr + 96, g2_data.begin());
@@ -296,7 +278,6 @@ namespace bls12_381_groth16
         }
         vk->gamma = g2_option.value();
         ptr += 96;
-        printf("idata9\n");
         return 1;
     }
     int precomputeVerifierKey(Groth16VerifierKeyPrecomputedValues *precomputed, const Groth16VerifierKeyInput *vk)
