@@ -32,16 +32,19 @@ public:
     static std::optional<g1> fromAffineBytesLE(const std::span<const uint8_t, 96> in,
                                                conv_opt opt = { .check_valid = false, .to_mont = true });
     static std::optional<g1> fromCompressedBytesBE(const std::span<const uint8_t, 48> in);
+    static std::optional<g1> fromCompressedMCLBytesLE(const std::span<const uint8_t, 48> in);
     void toJacobianBytesBE(const std::span<uint8_t, 144> out, const from_mont fm = from_mont::yes) const;
     void toJacobianBytesLE(const std::span<uint8_t, 144> out, const from_mont fm = from_mont::yes) const;
     void toAffineBytesBE(const std::span<uint8_t, 96> out, const from_mont fm = from_mont::yes) const;
     void toAffineBytesLE(const std::span<uint8_t, 96> out, const from_mont fm = from_mont::yes) const;
     void toCompressedBytesBE(const std::span<uint8_t, 48> out) const;
+    void toCompressedMCLBytesLE(const std::span<uint8_t, 48> out) const;
     std::array<uint8_t, 144> toJacobianBytesBE(const from_mont fm = from_mont::yes) const;
     std::array<uint8_t, 144> toJacobianBytesLE(const from_mont fm = from_mont::yes) const;
     std::array<uint8_t, 96> toAffineBytesBE(const from_mont fm = from_mont::yes) const;
     std::array<uint8_t, 96> toAffineBytesLE(const from_mont fm = from_mont::yes) const;
     std::array<uint8_t, 48> toCompressedBytesBE() const;
+    std::array<uint8_t, 48> toCompressedMCLBytesLE() const;
     static g1 zero();
     static g1 one();
     bool isZero() const;
@@ -98,16 +101,19 @@ public:
     static std::optional<g2> fromAffineBytesLE(const std::span<const uint8_t, 192> in,
                                                conv_opt opt = { .check_valid = false, .to_mont = true });
     static std::optional<g2> fromCompressedBytesBE(const std::span<const uint8_t, 96> in);
+    static std::optional<g2> fromCompressedMCLBytesLE(const std::span<const uint8_t, 96> in);
     void toJacobianBytesBE(const std::span<uint8_t, 288> out, const from_mont fm = from_mont::yes) const;
     void toJacobianBytesLE(const std::span<uint8_t, 288> out, const from_mont fm = from_mont::yes) const;
     void toAffineBytesBE(const std::span<uint8_t, 192> out, const from_mont fm = from_mont::yes) const;
     void toAffineBytesLE(const std::span<uint8_t, 192> out, const from_mont fm = from_mont::yes) const;
     void toCompressedBytesBE(const std::span<uint8_t, 96> out) const;
+    void toCompressedMCLBytesLE(const std::span<uint8_t, 96> out) const;
     std::array<uint8_t, 288> toJacobianBytesBE(const from_mont fm = from_mont::yes) const;
     std::array<uint8_t, 288> toJacobianBytesLE(const from_mont fm = from_mont::yes) const;
     std::array<uint8_t, 192> toAffineBytesBE(const from_mont fm = from_mont::yes) const;
     std::array<uint8_t, 192> toAffineBytesLE(const from_mont fm = from_mont::yes) const;
     std::array<uint8_t, 96> toCompressedBytesBE() const;
+    std::array<uint8_t, 96> toCompressedMCLBytesLE() const;
     static g2 zero();
     static g2 one();
     bool isZero() const;

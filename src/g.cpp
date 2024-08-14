@@ -95,6 +95,37 @@ optional<g1> g1::fromAffineBytesLE(const span<const uint8_t, 96> in, conv_opt op
     return p;
 }
 
+optional<g1> g1::fromCompressedMCLBytesLE(const span<const uint8_t, 48> in)
+{
+    // reconstruct point from x coordinate
+    bool yIsOdd = (in[47] >> 7) == 1;
+    g1 p;
+    scalar::fromBytesLE(in, p.x.d);
+    // erase 3 msbs from given input and perform validity check
+    p.x.d[5] &= 0x1FFFFFFFFFFFFFFF;
+    p.x = p.x.toMont();
+    if(!p.x.isValid())
+    {
+        return {};
+    }
+    // BLS 12-381 curve equation:
+    //      y^2 = x^3 + B
+    //  =>  y   = +/- sqrt(x^3 + B)
+    fp b = fp::B;
+    _square(&p.y, &p.x);        // y = x^2
+    _multiply(&p.y, &p.y, &p.x);     // y = x^2 * x = x^3
+    _add(&p.y, &p.y, &b);       // y = x^3 + B
+    if(!p.y.sqrt(p.y))
+    {
+        return {};
+    }
+    if(((p.y.fromMont().d[0]&1) ^ yIsOdd))
+    {
+        _negate(&p.y, &p.y);
+    }
+    p.z = fp::one();
+    return p;
+}
 optional<g1> g1::fromCompressedBytesBE(const span<const uint8_t, 48> in)
 {
     // check compression bit
@@ -196,6 +227,19 @@ void g1::toCompressedBytesBE(const span<uint8_t, 48> out) const
     out[0] |= 0x80;
 }
 
+void g1::toCompressedMCLBytesLE(const span<uint8_t, 48> out) const
+{
+    // check: https://github.com/zcash/librustzcash/blob/6e0364cd42a2b3d2b958a54771ef51a8db79dd29/pairing/src/bls12_381/README.md#serialization
+    g1 p = affine();
+    memcpy(out.data(), p.x.toBytesLE().data(), 48);
+    // checks if y component is odd
+    if((p.y.fromMont().d[0] & 1) == 1)
+    {
+        // set top bit of most significanty byte if y is odd
+        out[47] |= 0x80;
+    }
+}
+
 array<uint8_t, 144> g1::toJacobianBytesBE(const from_mont fm /* = from_mont::yes */) const
 {
     array<uint8_t, 144> out;
@@ -228,6 +272,13 @@ array<uint8_t, 48> g1::toCompressedBytesBE() const
 {
     array<uint8_t, 48> out;
     toCompressedBytesBE(out);
+    return out;
+}
+
+array<uint8_t, 48> g1::toCompressedMCLBytesLE() const
+{
+    array<uint8_t, 48> out;
+    toCompressedMCLBytesLE(out);
     return out;
 }
 
@@ -854,6 +905,43 @@ optional<g2> g2::fromCompressedBytesBE(const span<const uint8_t, 96> in)
     p.z = fp2::one();
     return p;
 }
+optional<g2> g2::fromCompressedMCLBytesLE(const span<const uint8_t, 96> in)
+{
+    bool yIsOdd = (in[95] >> 7) == 1;
+    g2 p;
+    auto c0 = fp::fromBytesLE(span<const uint8_t, 48>(&in[0], 48));
+    scalar::fromBytesLE<6>(span<const uint8_t, 48>(&in[48], 48), p.x.c1.d);
+    if (!c0) {
+        return {};
+    }
+    p.x.c0 = *c0;
+
+    // erase top bit from given input and perform validity check
+    p.x.c1.d[5] &= 0x7FFFFFFFFFFFFFFF;
+    p.x.c1 = p.x.c1.toMont();
+    if(!p.x.c1.isValid())
+    {
+        return {};
+    }
+    // BLS 12-381 curve equation:
+    //      y^2 = x^3 + B
+    //  =>  y   = +/- sqrt(x^3 + B)
+    fp2 b = fp2::B;
+    p.y = p.x.square();         // y = x^2
+    p.y = p.y.multiply(p.x);         // y = x^2 * x = x^3
+    p.y = p.y.add(b);           // y = x^3 + B
+    if(!p.y.sqrt(p.y))
+    {
+        return {};
+    }
+
+    if((p.y.c0.fromMont().d[0]&1) ^ yIsOdd)
+    {
+        p.y = p.y.negate();
+    }
+    p.z = fp2::one();
+    return p;
+}
 
 void g2::toJacobianBytesBE(const span<uint8_t, 288> out, const from_mont fm /* = from_mont::yes */) const
 {
@@ -915,6 +1003,21 @@ void g2::toCompressedBytesBE(const span<uint8_t, 96> out) const
     out[0] |= 0x80;
 }
 
+void g2::toCompressedMCLBytesLE(const span<uint8_t, 96> out) const
+{
+    // check: https://github.com/zcash/librustzcash/blob/6e0364cd42a2b3d2b958a54771ef51a8db79dd29/pairing/src/bls12_381/README.md#serialization
+    g2 p = affine();
+    memcpy(out.data(), p.x.c0.toBytesLE().data(), 48);
+    memcpy(out.data() + 48, p.x.c1.toBytesLE().data(), 48);
+    
+    // check if p.y.c0 is odd
+    if((p.y.c0.fromMont().d[0] & 1) == 1)
+    {
+        // if odd, set the top bit of the last byte (most significant byte of p.x.c1)
+        out[95] |= 0x80;
+    }
+}
+
 array<uint8_t, 288> g2::toJacobianBytesBE(const from_mont fm /* = from_mont::yes */) const
 {
     array<uint8_t, 288> out;
@@ -947,6 +1050,13 @@ array<uint8_t, 96> g2::toCompressedBytesBE() const
 {
     array<uint8_t, 96> out;
     toCompressedBytesBE(out);
+    return out;
+}
+
+array<uint8_t, 96> g2::toCompressedMCLBytesLE() const
+{
+    array<uint8_t, 96> out;
+    toCompressedMCLBytesLE(out);
     return out;
 }
 
