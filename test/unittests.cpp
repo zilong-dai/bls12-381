@@ -219,7 +219,6 @@ int testProofVerify(
     std::vector<unsigned char> verfierDataD = hexToBytesHelper(verfierDataDHex);
     std::vector<unsigned char> verfierDataE = hexToBytesHelper(verfierDataEHex);
     std::vector<unsigned char> verfierDataF = hexToBytesHelper(verfierDataFHex);
-    printf("Test 1\n");
 
     Groth16ProofWith2PublicInputs proof;
     Groth16VerifierKeyInput vk;
@@ -228,18 +227,15 @@ int testProofVerify(
         return 0;
     }
     PrintProof(&proof);
-    printf("Test 2\n");
     
     if(!deserializeVerifierKeyInput(&vk, &verfierDataA, &verfierDataB, &verfierDataC, &verfierDataD, &verfierDataE, &verfierDataF)){
         return 0;
     }
     PrintVK(&vk);
-    printf("Test 3\n");
     
     if(!precomputeVerifierKey(&precomputed, &vk)){
         return 0;
     }
-    printf("Test 4\n");
     
     return verifyProofWith2PublicInputs(&proof, &vk, &precomputed);
 
