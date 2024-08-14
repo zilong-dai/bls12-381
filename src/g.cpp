@@ -169,6 +169,30 @@ optional<g1> g1::fromCompressedMCLBytesLE(const span<const uint8_t, 48> in)
     return p;
 }
 
+array<uint8_t, 48> g1::toCompressedMCLBytesLE() const
+{
+    array<uint8_t, 48> out;
+    toCompressedMCLBytesLE(out);
+    return out;
+}
+
+void g1::toCompressedMCLBytesLE(const span<uint8_t, 48> out) const
+{
+    g1 p = affine();
+    // check if point is at infinity
+    if(p.x.isZero() && p.y.isZero())
+    {
+        memset(out.data(), 0, 48);
+        return;
+    }
+    memcpy(out.data(), p.x.toBytesLE(from_mont::yes).data(), 48);
+    // checks if y component is odd
+    if(p.y.fromMont().d[0] & 1)
+    {
+        out[47] |= 0x80;
+    }
+}
+
 void g1::toJacobianBytesBE(const span<uint8_t, 144> out, const from_mont fm /* = from_mont::yes */) const
 {
     memcpy(&out[ 0], &x.toBytesBE(fm)[0], 48);
@@ -899,7 +923,7 @@ optional<g2> g2::fromCompressedMCLBytesLE(const span<const uint8_t, 96> in)
     // scalar::fromBytesLE(in, p.x.c0.d);
     // scalar::fromBytesLE(in+48, p.x.c1.d);
     // erase 3 msbs from given input and perform validity check
-    p.x.c0.d[5] &= 0x1FFFFFFFFFFFFFFF;
+    p.x.c1.d[5] &= 0x1FFFFFFFFFFFFFFF;
     p.x.c0 = p.x.c0.toMont();
     p.x.c1 = p.x.c1.toMont();
     if(!p.x.c0.isValid() || !p.x.c1.isValid())
@@ -924,6 +948,32 @@ optional<g2> g2::fromCompressedMCLBytesLE(const span<const uint8_t, 96> in)
     p.z = fp2::one();
     return p;
 }
+
+array<uint8_t, 96> g2::toCompressedMCLBytesLE() const
+{
+    array<uint8_t, 96> out;
+    toCompressedMCLBytesLE(out);
+    return out;
+}
+
+void g2::toCompressedMCLBytesLE(const span<uint8_t, 96> out) const
+{
+    g2 p = affine();
+    // check if point is at infinity
+    if(p.x.isZero() && p.y.isZero())
+    {
+        memset(out.data(), 0, 96);
+        return;
+    }
+    
+    memcpy(out.data(), p.x.toBytesLE(from_mont::yes).data(), 96);
+    // checks if y component is odd
+    if(p.y.c0.fromMont().d[0] & 1)
+    {
+        out[95] |= 0x80;
+    }
+}
+
 
 void g2::toJacobianBytesBE(const span<uint8_t, 288> out, const from_mont fm /* = from_mont::yes */) const
 {

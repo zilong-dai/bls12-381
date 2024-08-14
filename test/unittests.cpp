@@ -2297,6 +2297,37 @@ void TestOutOfRangeInputs() {
     }
 }
 
+void TestMCLCompress(){
+
+    for (int ind = 0; ind < 10000; ind++)
+    {
+        g1 pg1 = random_g1();
+
+        std::array<uint8_t, 48> pg1_mcl_com_bytes = pg1.toCompressedMCLBytesLE();
+
+        g1 pg1_2 =  g1::fromCompressedMCLBytesLE(pg1_mcl_com_bytes).value();
+
+        if (!pg1_2.equal(pg1))
+        {
+            throw invalid_argument("g1::fromCompressedMCLBytesLE is not correct");
+        }
+    }
+    
+    for (int ind = 0; ind < 10000; ind++)
+    {
+        g2 pg2 = random_g2();
+
+        std::array<uint8_t, 96> pg2_mcl_com_bytes = pg2.toCompressedMCLBytesLE();
+        
+        g2 pg2_2 =  g2::fromCompressedMCLBytesLE(pg2_mcl_com_bytes).value();
+
+        if (!pg2_2.equal(pg2))
+        {
+            throw invalid_argument("g2::fromCompressedMCLBytesLE is not correct");
+        }
+    }
+}
+
 int main()
 {
     TestScalar();
@@ -2352,6 +2383,8 @@ int main()
 
     TestExtraVectors();
     TestOutOfRangeInputs();
+
+    TestMCLCompress();
 
     return 0;
 }
