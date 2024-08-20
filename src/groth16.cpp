@@ -78,7 +78,7 @@ using namespace bls12_381;
 namespace bls12_381_groth16
 {
 
-    bool deserializeG1FromVector(bls12_381::g1 *out, const std::vector<const unsigned char> *v, size_t startIndex)
+    bool deserializeG1FromVector(bls12_381::g1 *out, const std::vector<unsigned char> *v, size_t startIndex)
     {
         if (v->size() < (48 + startIndex))
         {
@@ -97,7 +97,7 @@ namespace bls12_381_groth16
             return true;
         }
     }
-    bool deserializeG2FromVector(bls12_381::g2 *out, const std::vector<const unsigned char> *v, size_t startIndex)
+    bool deserializeG2FromVector(bls12_381::g2 *out, const std::vector<unsigned char> *v, size_t startIndex)
     {
         if (v->size() < (96 + startIndex))
         {
@@ -116,7 +116,7 @@ namespace bls12_381_groth16
             return true;
         }
     }
-    bool deserializeFpFromVector(bls12_381::fp *out, const std::vector<const unsigned char> *v, size_t startIndex)
+    bool deserializeFpFromVector(bls12_381::fp *out, const std::vector<unsigned char> *v, size_t startIndex)
     {
         if (v->size() < (48 + startIndex))
         {
@@ -134,7 +134,7 @@ namespace bls12_381_groth16
             return true;
         }
     }
-    bool deserializeScalarFromVector(std::array<uint64_t, 4> &out, const std::vector<const unsigned char> *v, size_t startIndex)
+    bool deserializeScalarFromVector(std::array<uint64_t, 4> &out, const std::vector<unsigned char> *v, size_t startIndex)
     {
         if (v->size() < (32 + startIndex))
         {
@@ -162,7 +162,7 @@ namespace bls12_381_groth16
         {
             return 0;
         }
-        if (!deserializeG1FromVector(&proof->pi_1, (const std::vector<const unsigned char> *)pi_1, 0))
+        if (!deserializeG1FromVector(&proof->pi_1, (const std::vector<unsigned char> *)pi_1, 0))
         {
             return 0;
         }
@@ -176,15 +176,15 @@ namespace bls12_381_groth16
             return 0;
         }
         proof->pi_2 = pi_2_v.value();
-        if (!deserializeG1FromVector(&proof->pi_3, (const std::vector<const unsigned char> *)pi_3, 0))
+        if (!deserializeG1FromVector(&proof->pi_3, (const std::vector<unsigned char> *)pi_3, 0))
         {
             return 0;
         }
-        if (!deserializeScalarFromVector(proof->public_input_0, (const std::vector<const unsigned char> *)public_input_0, 0))
+        if (!deserializeScalarFromVector(proof->public_input_0, (const std::vector<unsigned char> *)public_input_0, 0))
         {
             return 0;
         }
-        if (!deserializeScalarFromVector(proof->public_input_1, (const std::vector<const unsigned char> *)public_input_1, 0))
+        if (!deserializeScalarFromVector(proof->public_input_1, (const std::vector<unsigned char> *)public_input_1, 0))
         {
             return 0;
         }
