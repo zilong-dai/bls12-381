@@ -49,20 +49,48 @@ public:
     bool isEven() const;
     bool isZero() const;
     bool isOne() const;
-    constexpr std::strong_ordering cmp(const fp& e) const {
-        for(int64_t i = 5; i >= 0; i--)
-        {
-            if(d[i] < e.d[i])
-            {
-                return std::strong_ordering::less;
+    enum class Ordering {
+        Less,
+        Greater,
+        Equal
+    };
+
+//    Ordering cmp(const fp& e) const {
+//        for(int64_t i = 5; i >= 0; i--) {
+//            if(d[i] < e.d[i]) {
+//                return Ordering::Less;
+//            }
+//            if(d[i] > e.d[i]) {
+//                return Ordering::Greater;
+//            }
+//        }
+//        return Ordering::Equal;
+//    }
+    int cmp(const fp& e) const {
+        for(int64_t i = 5; i >= 0; i--) {
+            if(d[i] < e.d[i]) {
+                return -1;
             }
-            if(d[i] > e.d[i])
-            {
-                return std::strong_ordering::greater;
+            if(d[i] > e.d[i]) {
+                return 1;
             }
         }
-        return std::strong_ordering::equal;
-    };
+        return 0;
+    }
+//    constexpr std::strong_ordering cmp(const fp& e) const {
+//        for(int64_t i = 5; i >= 0; i--)
+//        {
+//            if(d[i] < e.d[i])
+//            {
+//                return std::strong_ordering::less;
+//            }
+//            if(d[i] > e.d[i])
+//            {
+//                return std::strong_ordering::greater;
+//            }
+//        }
+//        return std::strong_ordering::equal;
+//    };
     bool equal(const fp& e) const;
     bool sign() const;
     
@@ -94,9 +122,31 @@ public:
     // They are mathematically correct in certain cases.
     // However, there are still ambiguity there as the fp can be in Montgomery form or not.
     // Please avoid using those operators.
-    constexpr std::strong_ordering operator<=>(const fp& e) const { return cmp(e); }
-    constexpr bool operator==(const fp& e) const { return cmp(e) == std::strong_ordering::equal; }
+//    constexpr std::strong_ordering operator<=>(const fp& e) const { return cmp(e); }
+    // 比较运算符重载
+    bool operator<(const fp& e) const {
+        return cmp(e) == -1;
+    }
 
+    bool operator>(const fp& e) const {
+        return cmp(e) == 1;
+    }
+
+    bool operator<=(const fp& e) const {
+        return cmp(e) != 1;
+    }
+
+    bool operator>=(const fp& e) const {
+        return cmp(e) != -1;
+    }
+
+    bool operator==(const fp& e) const {
+        return cmp(e) == 0;
+    }
+
+    bool operator!=(const fp& e) const {
+        return cmp(e) != 0;
+    }
     static const fp MODULUS;                            // base field modulus: p = 4002409555221667393417789825735904156556882819939007885332058136124031650490837864442687629129015664037894272559787 or 0x1A0111EA397FE69A4B1BA7B6434BACD764774B84F38512BF6730D2A0F6B0F6241EABFFFEB153FFFFB9FEFFFFFFFFAAAB
     static const uint64_t INP;                          // INP = -(p^{-1} mod 2^64) mod 2^64
     static const fp R1;                                 // base field identity: R1 = 2^384 mod p
@@ -162,7 +212,32 @@ public:
     // Those operators are defined to support set and map.
     // They are not mathematically correct.
     // DO NOT use them to compare fp2.
-    auto operator<=>(const fp2&) const = default;
+    //auto operator<=>(const fp2&) const = default;
+    bool operator==(const fp2& other) const {
+        return c0 == other.c0 && c1 == other.c1;
+    }
+
+    bool operator!=(const fp2& other) const {
+        return !(*this == other);
+    }
+
+    bool operator<(const fp2& other) const {
+        if (c0 < other.c0) return true;
+        if (other.c0 < c0) return false;
+        return c1 < other.c1;
+    }
+
+    bool operator>(const fp2& other) const {
+        return other < *this;
+    }
+
+    bool operator<=(const fp2& other) const {
+        return !(other < *this);
+    }
+
+    bool operator>=(const fp2& other) const {
+        return !(*this < other);
+    }
 
     static const fp2 negativeOne2;
     static const fp2 B;

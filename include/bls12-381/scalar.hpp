@@ -148,21 +148,36 @@ std::array<uint64_t, NC> multiply(const std::array<uint64_t, NA>& a, const std::
 
 // compares two std::arrays: returns -1 if a < b, 0 if a == b and 1 if a > b.
 template<size_t N>
-std::strong_ordering cmp(const std::array<uint64_t, N>& a, const std::array<uint64_t, N>& b)
-{
-    for(int64_t i = N-1; i >= 0; i--)
+//std::strong_ordering cmp(const std::array<uint64_t, N>& a, const std::array<uint64_t, N>& b)
+//{
+//    for(int64_t i = N-1; i >= 0; i--)
+//    {
+//        if(a[i] < b[i])
+//        {
+//            return std::strong_ordering::less;
+//        }
+//        if(a[i] > b[i])
+//        {
+//            return std::strong_ordering::greater;
+//        }
+//    }
+//    return std::strong_ordering::equal;
+//}
+    int cmp(const std::array<uint64_t, N>& a, const std::array<uint64_t, N>& b)
     {
-        if(a[i] < b[i])
+        for(int64_t i = N-1; i >= 0; i--)
         {
-            return std::strong_ordering::less;
+            if(a[i] < b[i])
+            {
+                return -1;  // 表示 a < b
+            }
+            if(a[i] > b[i])
+            {
+                return 1;  // 表示 a > b
+            }
         }
-        if(a[i] > b[i])
-        {
-            return std::strong_ordering::greater;
-        }
+        return 0;  // 表示 a == b
     }
-    return std::strong_ordering::equal;
-}
 
 // checks two std::arrays for equality: returns true if a == b, false otherwise.
 template<size_t N>
@@ -178,19 +193,21 @@ bool equal(const std::array<uint64_t, N>& a, const std::array<uint64_t, N>& b)
     return true;
 }
 
+
 // returns the length of the absolute value of s in bits. The bit length of 0 is 0.
 template<size_t N>
-uint64_t bitLength(const std::array<uint64_t, N>& s)
-{
-    for(int64_t i = N-1; i >= 0; i--)
+    uint64_t bitLength(const std::array<uint64_t, N>& s)
     {
-        if(s[i] != 0)
+        for(int64_t i = N-1; i >= 0; i--)
         {
-            return (i+1)*64 - std::countl_zero(s[i]);
+            if(s[i] != 0)
+            {
+                return (i+1)*64 - countLeadingZeros(s[i]);
+            }
         }
+        return 0;
     }
-    return 0;
-}
+
 
 // shifts an std::array by a certain amount of bits to the right
 template<size_t N>
@@ -399,6 +416,21 @@ std::array<uint8_t, N> hexToBytes(const std::string& s)
     hexToBytes<N>(s, out);
     return out;
 }
-std::vector<uint8_t> hexToBytes(std::string_view s);
+//std::vector<uint8_t> hexToBytes(std::string_view s);
+    std::vector<uint8_t> hexToBytes(const std::string& s) {
+        std::vector<uint8_t> bytes;
+
+        // 确保字符串的长度为偶数
+        if (s.length() % 2 != 0) {
+            throw std::invalid_argument("Hex string must have an even length");
+        }
+
+        for (size_t i = 0; i < s.length(); i += 2) {
+            uint8_t byte = static_cast<uint8_t>(std::stoi(s.substr(i, 2), nullptr, 16));
+            bytes.push_back(byte);
+        }
+
+        return bytes;
+    }
 
 } // namespace bls12_381
