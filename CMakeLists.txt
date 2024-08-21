@@ -13,7 +13,7 @@ file(GLOB BLS12-381_HEADERS CONFIGURE_DEPENDS include/bls12-381/*.hpp)
 add_library(bls12-381 ${BLS12-381_SOURCES})
 target_include_directories(bls12-381 PUBLIC include)
 set_target_properties(bls12-381 PROPERTIES PUBLIC_HEADER "${BLS12-381_HEADERS}")
-target_compile_features(bls12-381 PUBLIC cxx_std_20)
+target_compile_features(bls12-381 PUBLIC cxx_std_11)
 
 # the tests
 enable_testing()

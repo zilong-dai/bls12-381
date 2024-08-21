@@ -143,7 +143,7 @@ void TestMCLSerializeG2()
     printf("g2 - done\n");
 }
 
-std::vector<uint8_t> hexToBytesHelper(std::string_view s)
+std::vector<uint8_t> hexToBytesHelper(std::string s)
 {
     uint64_t start_idx = 0;
     if (s[0] == '0' && s[1] == 'x')

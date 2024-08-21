@@ -67,7 +67,34 @@ public:
     // Those operators are defined to support set and map.
     // They are not mathematically correct.
     // DO NOT use them to compare g1.
-    auto operator<=>(const g1&) const = default;
+    // auto operator<=>(const g1&) const = default;
+    bool operator==(const g1& other) const {
+        return x == other.x && y == other.y && z == other.z;
+    }
+
+    bool operator!=(const g1& other) const {
+        return !(*this == other);
+    }
+
+    bool operator<(const g1& other) const {
+        if (x < other.x) return true;
+        if (other.x < x) return false;
+        if (y < other.y) return true;
+        if (other.y < y) return false;
+        return z < other.z;
+    }
+
+    bool operator>(const g1& other) const {
+        return other < *this;
+    }
+
+    bool operator<=(const g1& other) const {
+        return !(other < *this);
+    }
+
+    bool operator>=(const g1& other) const {
+        return !(*this < other);
+    }
    
     static g1 weightedSum(tcb::span<const g1> points, tcb::span<const std::array<uint64_t, 4>> scalars, const std::function<void()>& yield = std::function<void()>());
     static g1 mapToCurve(const fp& e);
@@ -137,7 +164,33 @@ public:
     // Those operators are defined to support set and map.
     // They are not mathematically correct.
     // DO NOT use them to compare g2.
-    auto operator<=>(const g2&) const = default;
+    bool operator==(const  g2& other) const {
+        return x == other.x && y == other.y && z == other.z;
+    }
+
+    bool operator!=(const  g2& other) const {
+        return !(*this == other);
+    }
+
+    bool operator<(const  g2& other) const {
+        if (x < other.x) return true;
+        if (other.x < x) return false;
+        if (y < other.y) return true;
+        if (other.y < y) return false;
+        return z < other.z;
+    }
+
+    bool operator>(const  g2& other) const {
+        return other < *this;
+    }
+
+    bool operator<=(const g2& other) const {
+        return !(other < *this);
+    }
+
+    bool operator>=(const g2& other) const {
+        return !(*this < other);
+    }
 
     static g2 weightedSum(tcb::span<const g2> points, tcb::span<const std::array<uint64_t, 4>> scalars, const std::function<void()>& yield = std::function<void()>());
     static g2 mapToCurve(const fp2& e);

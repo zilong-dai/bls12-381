@@ -71,7 +71,7 @@ fp fp::one()
 
 bool fp::isValid() const
 {
-    return cmp(MODULUS) < 0;
+    return cmp(MODULUS) == qstrong_ordering::less;
 }
 
 bool fp::isOdd() const
@@ -256,7 +256,7 @@ fp fp::inverse() const
             v.div2(0);
             r.mul2();
         }
-        else if(u.cmp(v) > 0)
+        else if(u.cmp(v) == qstrong_ordering::greater)
         {
             _lsubtract(&u, &u, &v);
             u.div2(0);
@@ -278,7 +278,7 @@ fp fp::inverse() const
         return zero();
     }
 
-    if(r.cmp(MODULUS) >= 0)
+    if(r.cmp(MODULUS) != qstrong_ordering::less)
     {
         _lsubtract(&r, &r, &MODULUS);
     }
