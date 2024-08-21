@@ -10,7 +10,7 @@
 
 #include <bls12-381/fp.hpp>
 #include <bls12-381/g.hpp>
-
+#include <bls12-381/utils.hpp>
 namespace bls12_381
 {
 namespace scalar
@@ -148,21 +148,36 @@ std::array<uint64_t, NC> multiply(const std::array<uint64_t, NA>& a, const std::
 
 // compares two std::arrays: returns -1 if a < b, 0 if a == b and 1 if a > b.
 template<size_t N>
-std::strong_ordering cmp(const std::array<uint64_t, N>& a, const std::array<uint64_t, N>& b)
-{
-    for(int64_t i = N-1; i >= 0; i--)
+//std::strong_ordering cmp(const std::array<uint64_t, N>& a, const std::array<uint64_t, N>& b)
+//{
+//    for(int64_t i = N-1; i >= 0; i--)
+//    {
+//        if(a[i] < b[i])
+//        {
+//            return std::strong_ordering::less;
+//        }
+//        if(a[i] > b[i])
+//        {
+//            return std::strong_ordering::greater;
+//        }
+//    }
+//    return std::strong_ordering::equal;
+//}
+    int cmp(const std::array<uint64_t, N>& a, const std::array<uint64_t, N>& b)
     {
-        if(a[i] < b[i])
+        for(int64_t i = N-1; i >= 0; i--)
         {
-            return std::strong_ordering::less;
+            if(a[i] < b[i])
+            {
+                return -1;
+            }
+            if(a[i] > b[i])
+            {
+                return 1;
+            }
         }
-        if(a[i] > b[i])
-        {
-            return std::strong_ordering::greater;
-        }
+        return 0;
     }
-    return std::strong_ordering::equal;
-}
 
 // checks two std::arrays for equality: returns true if a == b, false otherwise.
 template<size_t N>
@@ -186,7 +201,7 @@ uint64_t bitLength(const std::array<uint64_t, N>& s)
     {
         if(s[i] != 0)
         {
-            return (i+1)*64 - std::countl_zero(s[i]);
+                return (i+1)*64 - countLeadingZeros(s[i]);
         }
     }
     return 0;
@@ -399,6 +414,7 @@ std::array<uint8_t, N> hexToBytes(const std::string& s)
     hexToBytes<N>(s, out);
     return out;
 }
-std::vector<uint8_t> hexToBytes(std::string_view s);
+//std::vector<uint8_t> hexToBytes(std::string_view s);
+std::vector<uint8_t> hexToBytes(const std::string& s);
 
 } // namespace bls12_381
