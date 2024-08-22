@@ -5,13 +5,14 @@
 #include <cstring>
 #include <polyfills/span.hpp>
 #include <stdexcept>
-#include <bit>
+// #include <bit>
 // #include <string_view>
 
 #include <bls12-381/fp.hpp>
 #include <bls12-381/g.hpp>
 
 #include <bls12-381/bls12-381.hpp>
+#include <vector>
 
 namespace bls12_381
 {
@@ -366,7 +367,7 @@ g2 g2::scale(const std::array<uint64_t, N>& s) const
 template<size_t N>
 std::string bytesToHex(const tcb::span<const uint8_t, N>& in)
 {
-    constexpr char hexmap[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+    char hexmap[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
     std::string s(2 + N * 2, ' ');
     s[0] = '0';
     s[1] = 'x';

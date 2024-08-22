@@ -6,7 +6,6 @@
 #include <tuple>
 #include <polyfills/optional.hpp>
 #include <polyfills/span.hpp>
-#include <compare>
 
 namespace bls12_381
 {
@@ -49,7 +48,7 @@ public:
     bool isEven() const;
     bool isZero() const;
     bool isOne() const;
-    constexpr qstrong_ordering cmp(const fp& e) const {
+    qstrong_ordering cmp(const fp& e) const {
         for(int64_t i = 5; i >= 0; i--)
         {
             if(d[i] < e.d[i])
@@ -95,13 +94,13 @@ public:
     // However, there are still ambiguity there as the fp can be in Montgomery form or not.
     // Please avoid using those operators.
     // constexpr qstrong_ordering operator<=>(const fp& e) const { return cmp(e); }
-    constexpr bool operator>(const fp& e) const { return cmp(e) == qstrong_ordering::greater; }
-    constexpr bool operator>=(const fp& e) const { return cmp(e) != qstrong_ordering::less; }
-    constexpr bool operator<(const fp& e) const { return cmp(e) == qstrong_ordering::less; }
-    constexpr bool operator<=(const fp& e) const { return cmp(e) != qstrong_ordering::greater; }
-    constexpr bool operator!=(const fp& e) const { return cmp(e) != qstrong_ordering::equal; }
+    bool operator>(const fp& e) const { return cmp(e) == qstrong_ordering::greater; }
+    bool operator>=(const fp& e) const { return cmp(e) != qstrong_ordering::less; }
+    bool operator<(const fp& e) const { return cmp(e) == qstrong_ordering::less; }
+    bool operator<=(const fp& e) const { return cmp(e) != qstrong_ordering::greater; }
+    bool operator!=(const fp& e) const { return cmp(e) != qstrong_ordering::equal; }
 
-    constexpr bool operator==(const fp& e) const { return cmp(e) == qstrong_ordering::equal; }
+    bool operator==(const fp& e) const { return cmp(e) == qstrong_ordering::equal; }
 
     static const fp MODULUS;                            // base field modulus: p = 4002409555221667393417789825735904156556882819939007885332058136124031650490837864442687629129015664037894272559787 or 0x1A0111EA397FE69A4B1BA7B6434BACD764774B84F38512BF6730D2A0F6B0F6241EABFFFEB153FFFFB9FEFFFFFFFFAAAB
     static const uint64_t INP;                          // INP = -(p^{-1} mod 2^64) mod 2^64
