@@ -19,7 +19,13 @@ TEST_SOURCES = test/unittests.cpp
 # Object files for the test program
 TEST_OBJECTS = $(patsubst %.cpp,%.o,$(TEST_SOURCES))
 
-all: lib$(LIB_NAME).a unittest
+# Source files for the test program
+BENCH_SOURCES = bench/eth_bench.cpp
+
+# Object files for the bench program
+BENCH_OBJECTS = $(patsubst %.cpp,%.o,$(BENCH_SOURCES))
+
+all: lib$(LIB_NAME).a unittest eth_bench
 
 lib$(LIB_NAME).a: $(LIB_OBJECTS)
 	ar rcs $@ $^
@@ -30,5 +36,8 @@ lib$(LIB_NAME).a: $(LIB_OBJECTS)
 unittest: $(TEST_OBJECTS) lib$(LIB_NAME).a
 	$(CC) $(CFLAGS) $^ -o test/$@ -L. -l$(LIB_NAME) -I$(INCLUDE_HEADERS)
 
+eth_bench: $(BENCH_OBJECTS) lib$(LIB_NAME).a
+	$(CC) $(CFLAGS) $^ -o bench/$@ -L. -l$(LIB_NAME) -I$(INCLUDE_HEADERS)
+
 clean:
-	rm -f $(LIB_OBJECTS) $(TEST_OBJECTS) $(LIB_NAME).a unittest
+	rm -f $(LIB_OBJECTS) $(TEST_OBJECTS) $(BENCH_OBJECTS) lib$(LIB_NAME).a test/unittest bench/eth_bench
