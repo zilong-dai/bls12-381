@@ -526,7 +526,7 @@ g1 g1::weightedSum(tcb::span<const g1> points, tcb::span<const std::array<uint64
     uint64_t c = 3;
     if(effective_size >= 32)
     {
-        c = (std::numeric_limits<size_t>::digits - qcountl_zero(effective_size))/3 + 2;
+        c = (sizeof(size_t) * 8 - qcountl_zero(effective_size))/3 + 2;
     }
     uint64_t bucketSize = (1<<c)-1;
     uint64_t windowsSize = 255/c+1;
@@ -1349,7 +1349,7 @@ g2 g2::weightedSum(tcb::span<const g2> points, tcb::span<const std::array<uint64
     uint64_t c = 3;
     if(effective_size >= 32)
     {
-        c = (std::numeric_limits<size_t>::digits - qcountl_zero(effective_size))/3 + 2;
+        c = (sizeof(size_t) * 8 - qcountl_zero(effective_size))/3 + 2;
     }
     uint64_t bucketSize = (1<<c)-1;
     uint64_t windowsSize = 255/c+1;
