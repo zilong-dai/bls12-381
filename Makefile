@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -std=c++17 -w -o3 
+CFLAGS = -std=c++14 -w -o3 
 
 # Name of the library
 LIB_NAME = bls
