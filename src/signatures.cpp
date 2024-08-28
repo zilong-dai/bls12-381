@@ -163,7 +163,7 @@ int hkdf256_extract_expand(
     return hkdf256_expand(output, outputLen, prk.data(), info, infoLen);
 }
 
-array<uint64_t, 4> secret_key(std::span<const uint8_t> seed)
+array<uint64_t, 4> secret_key(tcb::span<const uint8_t> seed)
 {
     // KeyGen
     // 1. PRK = HKDF-Extract("BLS-SIG-KEYGEN-SALT-", IKM || I2OSP(0, 1))
@@ -213,7 +213,7 @@ array<uint64_t, 4> secret_key(std::span<const uint8_t> seed)
         );
 
         // Make sure private key is less than the curve order
-        array<uint64_t, 6> skBn = scalar::fromBytesBE<6>(span<uint8_t, 48>(okmHkdf.begin(), okmHkdf.end()));
+        array<uint64_t, 6> skBn = scalar::fromBytesBE<6>(tcb::span<uint8_t, 48>(okmHkdf.begin(), okmHkdf.end()));
         array<uint64_t, 6> quotient = {};
 
         bn_divn_safe(quotient, sk, skBn, fp::Q);
@@ -308,27 +308,6 @@ array<uint64_t, 4> derive_child_sk(
     return child;
 }
 
-array<uint64_t, 4> derive_child_sk_unhardened(
-    const array<uint64_t, 4>& parentSk,
-    uint32_t index
-)
-{
-    array<uint8_t, 48 + 4> buf;
-    array<uint8_t, 32> digest;
-    memcpy(buf.data(), public_key(parentSk).toCompressedBytesBE().data(), 48);
-    
-    for(size_t i = 0; i < 4; i++)
-    {
-        buf[48 + 3 - i] = (index >> (i * 8));
-    }
-    sha256 sha;
-    sha.update(buf.data(), 48 + 4);
-    sha.digest(digest.data());
-
-    array<uint64_t, 4> ret = aggregate_secret_keys(std::array{parentSk, sk_from_bytes(digest, true)});
-    return ret;
-}
-
 g1 derive_child_g1_unhardened(
     const g1& pk,
     uint32_t index
@@ -346,7 +325,7 @@ g1 derive_child_g1_unhardened(
     sha.update(buf.data(), 48 + 4);
     sha.digest(digest.data());
 
-    array<uint64_t, 4> nonce = scalar::fromBytesBE<4>(span<uint8_t, 32>(digest.begin(), digest.end()));
+    array<uint64_t, 4> nonce = scalar::fromBytesBE<4>(tcb::span<uint8_t, 32>(digest.begin(), digest.end()));
     array<uint64_t, 4> quotient = {};
     array<uint64_t, 4> remainder = {};
 
@@ -372,7 +351,7 @@ g2 derive_child_g2_unhardened(
     sha.update(buf.data(), 96 + 4);
     sha.digest(digest.data());
 
-    array<uint64_t, 4> nonce = scalar::fromBytesBE<4>(span<uint8_t, 32>(digest.begin(), digest.end()));
+    array<uint64_t, 4> nonce = scalar::fromBytesBE<4>(tcb::span<uint8_t, 32>(digest.begin(), digest.end()));
     array<uint64_t, 4> quotient = {};
     array<uint64_t, 4> remainder = {};
 
@@ -381,7 +360,7 @@ g2 derive_child_g2_unhardened(
     return pk.add(g2::one().scale(remainder));
 }
 
-array<uint64_t, 4> aggregate_secret_keys(std::span<const std::array<uint64_t, 4>> sks)
+array<uint64_t, 4> aggregate_secret_keys(tcb::span<const std::array<uint64_t, 4>> sks)
 {
     if(sks.empty())
     {
@@ -413,7 +392,7 @@ array<uint64_t, 4> sk_from_bytes(
     const bool modOrder
 )
 {
-    array<uint64_t, 4> sk = scalar::fromBytesBE<4>(span<const uint8_t, 32>(in.begin(), in.end()));
+    array<uint64_t, 4> sk = scalar::fromBytesBE<4>(tcb::span<const uint8_t, 32>(in.begin(), in.end()));
 
     if(modOrder)
     {
@@ -425,7 +404,7 @@ array<uint64_t, 4> sk_from_bytes(
     }
     else
     {
-        if(scalar::cmp<4>(sk, fp::Q) >= 0)
+        if(scalar::cmp<4>(sk, fp::Q) != qstrong_ordering::less)
         {
             //throw std::invalid_argument("PrivateKey byte data must be less than the group order");
             return {0, 0, 0, 0};
@@ -438,6 +417,27 @@ array<uint64_t, 4> sk_from_bytes(
 g1 public_key(const array<uint64_t, 4>& sk)
 {
     return g1::one().scale(sk).affine();
+}
+
+array<uint64_t, 4> derive_child_sk_unhardened(
+    const array<uint64_t, 4>& parentSk,
+    uint32_t index
+)
+{
+    array<uint8_t, 48 + 4> buf;
+    array<uint8_t, 32> digest;
+    memcpy(buf.data(), public_key(parentSk).toCompressedBytesBE().data(), 48);
+    
+    for(size_t i = 0; i < 4; i++)
+    {
+        buf[48 + 3 - i] = (index >> (i * 8));
+    }
+    sha256 sha;
+    sha.update(buf.data(), 48 + 4);
+    sha.digest(digest.data());
+
+    array<uint64_t, 4> ret = aggregate_secret_keys(std::array<std::array<uint64_t, 4>, 2>{parentSk, sk_from_bytes(digest, true)});
+    return ret;
 }
 
 // Construct an extensible-output function based on SHA256
@@ -495,7 +495,7 @@ int xmd_sh256(
 
 
 g2 fromMessage(
-    std::span<const uint8_t> msg,
+    tcb::span<const uint8_t> msg,
     const string& dst
 )
 {
@@ -507,17 +507,17 @@ g2 fromMessage(
     fp2 x, y, z = fp2::one();
     g2 p, q;
 
-    k = scalar::fromBytesBE<8>(span<uint8_t, 64>(buf, buf + 64));
+    k = scalar::fromBytesBE<8>(tcb::span<uint8_t, 64>(buf, buf + 64));
     t.c0 = fp::modPrime(k);
-    k = scalar::fromBytesBE<8>(span<uint8_t, 64>(buf + 64, buf + 2*64));
+    k = scalar::fromBytesBE<8>(tcb::span<uint8_t, 64>(buf + 64, buf + 2*64));
     t.c1 = fp::modPrime(k);
 
     tie(x, y) = g2::swuMapG2(t);
     p = g2({x, y, z}).isogenyMap();
 
-    k = scalar::fromBytesBE<8>(span<uint8_t, 64>(buf + 2*64, buf + 3*64));
+    k = scalar::fromBytesBE<8>(tcb::span<uint8_t, 64>(buf + 2*64, buf + 3*64));
     t.c0 = fp::modPrime(k);
-    k = scalar::fromBytesBE<8>(span<uint8_t, 64>(buf + 3*64, buf + 4*64));
+    k = scalar::fromBytesBE<8>(tcb::span<uint8_t, 64>(buf + 3*64, buf + 4*64));
     t.c1 = fp::modPrime(k);
 
     tie(x, y) = g2::swuMapG2(t);
@@ -528,7 +528,7 @@ g2 fromMessage(
 
 g2 sign(
     const array<uint64_t, 4>& sk,
-    std::span<const uint8_t> msg
+    tcb::span<const uint8_t> msg
 )
 {
     g2 p = fromMessage(msg, CIPHERSUITE_ID);
@@ -537,7 +537,7 @@ g2 sign(
 
 bool verify(
     const g1& pubkey,
-    std::span<const uint8_t> message,
+    tcb::span<const uint8_t> message,
     const g2& signature
 )
 {
@@ -559,7 +559,7 @@ bool verify(
     return fp12::one().equal(pairing::calculate(v));
 }
 
-g1 aggregate_public_keys(std::span<const g1> pks)
+g1 aggregate_public_keys(tcb::span<const g1> pks)
 {
     g1 agg_pk = g1({fp::zero(), fp::zero(), fp::zero()});
     for(const g1& pk : pks)
@@ -569,7 +569,7 @@ g1 aggregate_public_keys(std::span<const g1> pks)
     return agg_pk;
 }
 
-g2 aggregate_signatures(std::span<const g2> sigs)
+g2 aggregate_signatures(tcb::span<const g2> sigs)
 {
     g2 agg_sig = g2({fp2::zero(), fp2::zero(), fp2::zero()});
     for(const g2& sig : sigs)
@@ -580,8 +580,8 @@ g2 aggregate_signatures(std::span<const g2> sigs)
 }
 
 bool aggregate_verify(
-    std::span<const g1> pubkeys,
-    std::span<const std::vector<uint8_t>> messages,
+    tcb::span<const g1> pubkeys,
+    tcb::span<const std::vector<uint8_t>> messages,
     const g2& signature,
     const bool checkForDuplicateMessages
 )
@@ -661,8 +661,8 @@ bool pop_verify(
 }
 
 bool pop_fast_aggregate_verify(
-    std::span<const g1> pubkeys,
-    std::span<const uint8_t> message,
+    tcb::span<const g1> pubkeys,
+    tcb::span<const uint8_t> message,
     const g2& signature
 )
 {

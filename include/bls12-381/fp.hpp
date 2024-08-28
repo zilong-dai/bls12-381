@@ -4,9 +4,8 @@
 #include <array>
 #include <string>
 #include <tuple>
-#include <optional>
-#include <span>
-#include <compare>
+#include <polyfills/optional.hpp>
+#include <polyfills/span.hpp>
 
 namespace bls12_381
 {
@@ -33,12 +32,12 @@ public:
     fp();
     explicit fp(const std::array<uint64_t, 6>& d);
     fp(const fp& e);
-    static std::optional<fp> fromBytesBE(const std::span<const uint8_t, 48> in,
+    static tl::optional<fp> fromBytesBE(const tcb::span<const uint8_t, 48> in,
                                          const conv_opt opt = { .check_valid = true, .to_mont = true });
-    static std::optional<fp> fromBytesLE(const std::span<const uint8_t, 48> in,
+    static tl::optional<fp> fromBytesLE(const tcb::span<const uint8_t, 48> in,
                                          const conv_opt opt = { .check_valid = true, .to_mont = true });
-    void toBytesBE(const std::span<uint8_t, 48> out, const from_mont fm = from_mont::yes) const;
-    void toBytesLE(const std::span<uint8_t, 48> out, const from_mont fm = from_mont::yes) const;
+    void toBytesBE(const tcb::span<uint8_t, 48> out, const from_mont fm = from_mont::yes) const;
+    void toBytesLE(const tcb::span<uint8_t, 48> out, const from_mont fm = from_mont::yes) const;
     std::array<uint8_t, 48> toBytesBE(const from_mont fm = from_mont::yes) const;
     std::array<uint8_t, 48> toBytesLE(const from_mont fm = from_mont::yes) const;
     static fp zero();
@@ -48,19 +47,19 @@ public:
     bool isEven() const;
     bool isZero() const;
     bool isOne() const;
-    constexpr std::strong_ordering cmp(const fp& e) const {
+    qstrong_ordering cmp(const fp& e) const {
         for(int64_t i = 5; i >= 0; i--)
         {
             if(d[i] < e.d[i])
             {
-                return std::strong_ordering::less;
+                return qstrong_ordering::less;
             }
             if(d[i] > e.d[i])
             {
-                return std::strong_ordering::greater;
+                return qstrong_ordering::greater;
             }
         }
-        return std::strong_ordering::equal;
+        return qstrong_ordering::equal;
     };
     bool equal(const fp& e) const;
     bool sign() const;
@@ -93,8 +92,14 @@ public:
     // They are mathematically correct in certain cases.
     // However, there are still ambiguity there as the fp can be in Montgomery form or not.
     // Please avoid using those operators.
-    constexpr std::strong_ordering operator<=>(const fp& e) const { return cmp(e); }
-    constexpr bool operator==(const fp& e) const { return cmp(e) == std::strong_ordering::equal; }
+    // constexpr qstrong_ordering operator<=>(const fp& e) const { return cmp(e); }
+    bool operator>(const fp& e) const { return cmp(e) == qstrong_ordering::greater; }
+    bool operator>=(const fp& e) const { return cmp(e) != qstrong_ordering::less; }
+    bool operator<(const fp& e) const { return cmp(e) == qstrong_ordering::less; }
+    bool operator<=(const fp& e) const { return cmp(e) != qstrong_ordering::greater; }
+    bool operator!=(const fp& e) const { return cmp(e) != qstrong_ordering::equal; }
+
+    bool operator==(const fp& e) const { return cmp(e) == qstrong_ordering::equal; }
 
     static const fp MODULUS;                            // base field modulus: p = 4002409555221667393417789825735904156556882819939007885332058136124031650490837864442687629129015664037894272559787 or 0x1A0111EA397FE69A4B1BA7B6434BACD764774B84F38512BF6730D2A0F6B0F6241EABFFFEB153FFFFB9FEFFFFFFFFAAAB
     static const uint64_t INP;                          // INP = -(p^{-1} mod 2^64) mod 2^64
@@ -121,12 +126,12 @@ public:
     fp2();
     explicit fp2(const std::array<fp, 2>& e2);
     fp2(const fp2& e);
-    static std::optional<fp2> fromBytesBE(const std::span<const uint8_t, 96> in,
+    static tl::optional<fp2> fromBytesBE(const tcb::span<const uint8_t, 96> in,
                                           const conv_opt opt = { .check_valid = true, .to_mont = true });
-    static std::optional<fp2> fromBytesLE(const std::span<const uint8_t, 96> in,
+    static tl::optional<fp2> fromBytesLE(const tcb::span<const uint8_t, 96> in,
                                           const conv_opt opt = { .check_valid = true, .to_mont = true });
-    void toBytesBE(const std::span<uint8_t, 96> out, const from_mont fm = from_mont::yes) const;
-    void toBytesLE(const std::span<uint8_t, 96> out, const from_mont fm = from_mont::yes) const;
+    void toBytesBE(const tcb::span<uint8_t, 96> out, const from_mont fm = from_mont::yes) const;
+    void toBytesLE(const tcb::span<uint8_t, 96> out, const from_mont fm = from_mont::yes) const;
     std::array<uint8_t, 96> toBytesBE(const from_mont fm = from_mont::yes) const;
     std::array<uint8_t, 96> toBytesLE(const from_mont fm = from_mont::yes) const;
     static fp2 zero();
@@ -161,7 +166,32 @@ public:
     // Those operators are defined to support set and map.
     // They are not mathematically correct.
     // DO NOT use them to compare fp2.
-    auto operator<=>(const fp2&) const = default;
+    // auto operator<=>(const fp2&) const = default;
+    bool operator==(const fp2& other) const {
+        return c0 == other.c0 && c1 == other.c1;
+    }
+
+    bool operator!=(const fp2& other) const {
+        return !(*this == other);
+    }
+
+    bool operator<(const fp2& other) const {
+        if (c0 < other.c0) return true;
+        if (other.c0 < c0) return false;
+        return c1 < other.c1;
+    }
+
+    bool operator>(const fp2& other) const {
+        return other < *this;
+    }
+
+    bool operator<=(const fp2& other) const {
+        return !(other < *this);
+    }
+
+    bool operator>=(const fp2& other) const {
+        return !(*this < other);
+    }
 
     static const fp2 negativeOne2;
     static const fp2 B;
@@ -182,12 +212,12 @@ public:
     fp6();
     explicit fp6(const std::array<fp2, 3>& e3);
     fp6(const fp6& e);
-    static std::optional<fp6> fromBytesBE(const std::span<const uint8_t, 288> in,
+    static tl::optional<fp6> fromBytesBE(const tcb::span<const uint8_t, 288> in,
                                           const conv_opt opt = { .check_valid = true, .to_mont = true });
-    static std::optional<fp6> fromBytesLE(const std::span<const uint8_t, 288> in,
+    static tl::optional<fp6> fromBytesLE(const tcb::span<const uint8_t, 288> in,
                                           const conv_opt opt = { .check_valid = true, .to_mont = true });
-    void toBytesBE(const std::span<uint8_t, 288> out, const from_mont fm = from_mont::yes) const;
-    void toBytesLE(const std::span<uint8_t, 288> out, const from_mont fm = from_mont::yes) const;
+    void toBytesBE(const tcb::span<uint8_t, 288> out, const from_mont fm = from_mont::yes) const;
+    void toBytesLE(const tcb::span<uint8_t, 288> out, const from_mont fm = from_mont::yes) const;
     std::array<uint8_t, 288> toBytesBE(const from_mont fm = from_mont::yes) const;
     std::array<uint8_t, 288> toBytesLE(const from_mont fm = from_mont::yes) const;
     static fp6 zero();
@@ -232,12 +262,12 @@ public:
     fp12();
     explicit fp12(const std::array<fp6, 2>& e2);
     fp12(const fp12& e);
-    static std::optional<fp12> fromBytesBE(const std::span<const uint8_t, 576> in,
+    static tl::optional<fp12> fromBytesBE(const tcb::span<const uint8_t, 576> in,
                                            const conv_opt opt = { .check_valid = true, .to_mont = true });
-    static std::optional<fp12> fromBytesLE(const std::span<const uint8_t, 576> in,
+    static tl::optional<fp12> fromBytesLE(const tcb::span<const uint8_t, 576> in,
                                            const conv_opt opt = { .check_valid = true, .to_mont = true });
-    void toBytesBE(const std::span<uint8_t, 576> out, const from_mont fm = from_mont::yes) const;
-    void toBytesLE(const std::span<uint8_t, 576> out, const from_mont fm = from_mont::yes) const;
+    void toBytesBE(const tcb::span<uint8_t, 576> out, const from_mont fm = from_mont::yes) const;
+    void toBytesLE(const tcb::span<uint8_t, 576> out, const from_mont fm = from_mont::yes) const;
     std::array<uint8_t, 576> toBytesBE(const from_mont fm = from_mont::yes) const;
     std::array<uint8_t, 576> toBytesLE(const from_mont fm = from_mont::yes) const;
     static fp12 zero();

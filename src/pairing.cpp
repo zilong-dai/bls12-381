@@ -93,13 +93,13 @@ void pre_compute(array<array<fp2, 3>, 68>& ellCoeffs, const g2& twistPoint)
     }
 }
 
-fp12 miller_loop(std::span<const std::tuple<g1, g2>> pairs, std::function<void()> yield)
+fp12 miller_loop(tcb::span<const std::tuple<g1, g2>> pairs, std::function<void()> yield)
 {
     vector<array<array<fp2, 3>, 68>> ellCoeffs;
     ellCoeffs.resize(pairs.size());
     for(uint64_t i = 0; i < pairs.size(); i++)
     {
-        pre_compute(ellCoeffs[i], get<g2>(pairs[i]));
+        pre_compute(ellCoeffs[i], get<1>(pairs[i]));
     }
     if(pairs.size() >= 20 && yield)
     {
@@ -116,8 +116,8 @@ fp12 miller_loop(std::span<const std::tuple<g1, g2>> pairs, std::function<void()
         }
         for(uint64_t j = 0; j <= pairs.size()-1; j++)
         {
-            t[0] = ellCoeffs[j][k][2].mulByFq(get<g1>(pairs[j]).y);
-            t[1] = ellCoeffs[j][k][1].mulByFq(get<g1>(pairs[j]).x);
+            t[0] = ellCoeffs[j][k][2].mulByFq(get<0>(pairs[j]).y);
+            t[1] = ellCoeffs[j][k][1].mulByFq(get<0>(pairs[j]).x);
             f.mulBy014Assign(ellCoeffs[j][k][0], t[1], t[0]);
         }
         if(((g2::cofactorEFF[0] >> i) & 1) == 1)
@@ -125,8 +125,8 @@ fp12 miller_loop(std::span<const std::tuple<g1, g2>> pairs, std::function<void()
             k++;
             for(uint64_t j = 0; j <= pairs.size()-1; j++)
             {
-                t[0] = ellCoeffs[j][k][2].mulByFq(get<g1>(pairs[j]).y);
-                t[1] = ellCoeffs[j][k][1].mulByFq(get<g1>(pairs[j]).x);
+                t[0] = ellCoeffs[j][k][2].mulByFq(get<0>(pairs[j]).y);
+                t[1] = ellCoeffs[j][k][1].mulByFq(get<0>(pairs[j]).x);
                 f.mulBy014Assign(ellCoeffs[j][k][0], t[1], t[0]);
             }
         }
@@ -177,7 +177,7 @@ void final_exponentiation(fp12& f)
     f = t[3].multiply(t[4]);
 }
 
-fp12 calculate(std::span<const std::tuple<g1, g2>> pairs, std::function<void()> yield)
+fp12 calculate(tcb::span<const std::tuple<g1, g2>> pairs, std::function<void()> yield)
 {
     fp12 f = fp12::one();
     if(pairs.empty())

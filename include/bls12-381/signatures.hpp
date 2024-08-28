@@ -102,70 +102,68 @@ g2 derive_child_g2_unhardened(
 );
 
 // Implements secret key derivation based on HKDF Mod R as specified in EIP 2333: https://eips.ethereum.org/EIPS/eip-2333#hkdf_mod_r
-std::array<uint64_t, 4> secret_key(std::span<const uint8_t> seed);
+std::array<uint64_t, 4> secret_key(tcb::span<const uint8_t> seed);
 
 // Derive public key from a BLS private key
 g1 public_key(const std::array<uint64_t, 4>& sk);
 
 g2 fromMessage(
-    std::span<const uint8_t> msg,
+    tcb::span<const uint8_t> msg,
     const std::string& dst
 );
 
 // Sign message with a private key
 g2 sign(
     const std::array<uint64_t, 4>& sk,
-    std::span<const uint8_t> msg
+    tcb::span<const uint8_t> msg
 );
 
 // Verify signature of a message using a public key
 bool verify(
     const g1& pubkey,
-    std::span<const uint8_t> message,
+    tcb::span<const uint8_t> message,
     const g2& signature
 );
 
 // Aggregate private keys
-std::array<uint64_t, 4> aggregate_secret_keys(std::span<const std::array<uint64_t, 4>> sks);
+std::array<uint64_t, 4> aggregate_secret_keys(tcb::span<const std::array<uint64_t, 4>> sks);
 
 // Aggregate public keys
-g1 aggregate_public_keys(std::span<const g1> pks);
+g1 aggregate_public_keys(tcb::span<const g1> pks);
 
 // Aggregate signatures
-g2 aggregate_signatures(std::span<const g2> sigs);
+g2 aggregate_signatures(tcb::span<const g2> sigs);
 
 // Aggregate verify using a set of public keys, a set of messages and an aggregated signature
 // the boolean parameter enables an additional check for duplicate messages (possible attack
 // vector: see page 6 of https://crypto.stanford.edu/~dabo/pubs/papers/aggreg.pdf, "A potential
 // attack on aggregate signatures.")
 bool aggregate_verify(
-    std::span<const g1> pubkeys,
-    std::span<const std::vector<uint8_t>> messages,
+    tcb::span<const g1> pubkeys,
+    tcb::span<const std::vector<uint8_t>> messages,
     const g2& signature,
     const bool checkForDuplicateMessages = false
 );
 
 // `f` is an accessor function in case we have a span of objects of type T containing public keys: `g1 f(const T&)`
 // `pred` can be used to aggregate public keys specified in a bit mask for example: `bool pred(const T&, size_t)`
-template<class T, class F, class PRED = decltype([](const T&, size_t){return true;})>
-inline auto aggregate_public_keys(std::span<T> pks, F&& f, PRED&& pred = PRED())
-    -> decltype(f(*pks.data()), pred(*pks.data(), 0), g1()) {
+template<class T, class F>
+inline g1 aggregate_public_keys(tcb::span<T> pks, F&& f, bool (*pred)(const T&, size_t) = nullptr) {
     g1 agg_pk = g1({fp::zero(), fp::zero(), fp::zero()});
     for (size_t i=0; i<pks.size(); ++i)
-        if (std::forward<PRED>(pred)(pks[i], i))
-            agg_pk = agg_pk.add(std::forward<F>(f)(pks[i]));
+        if (pred == nullptr || pred(pks[i], i))
+            agg_pk = agg_pk.add(f(pks[i]));
     return agg_pk;
 }
 
 // f is an accessor function in case we have a span of objects of type T containing signatures: `g2 f(const T&)`
 // pred can be used to aggregate signatures specified in a bit mask for example: `bool pred(const T&, size_t)`
-template<class T, class F, class PRED = decltype([](const T&, size_t){return true;})>
-inline auto aggregate_signatures(std::span<T> sigs, F&& f, PRED&& pred = PRED()) 
-    -> decltype(f(*sigs.data()), pred(*sigs.data(), 0), g2()) {
+template<class T, class F>
+inline g2 aggregate_signatures(tcb::span<T> sigs, F&& f, bool (*pred)(const T&, size_t) = nullptr) {
     g2 agg_sig = g2({fp2::zero(), fp2::zero(), fp2::zero()});
     for (size_t i=0; i<sigs.size(); ++i)
-        if (std::forward<PRED>(pred)(sigs[i], i))
-            agg_sig = agg_sig.add(std::forward<F>(f)(sigs[i]));
+        if (pred == nullptr || pred(sigs[i], i))
+            agg_sig = agg_sig.add(f(sigs[i]));
     return agg_sig;
 }
 
@@ -187,8 +185,8 @@ bool pop_verify(
 );
 
 bool pop_fast_aggregate_verify(
-    std::span<const g1> pubkeys,
-    std::span<const uint8_t> message,
+    tcb::span<const g1> pubkeys,
+    tcb::span<const uint8_t> message,
     const g2& signature
 );
 
